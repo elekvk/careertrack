@@ -8,7 +8,7 @@ let main args =
     let app = builder.Build()
 
     app.MapGet("/", Func<string>(fun () -> "Hello World!")) |> ignore
-
+    app.MapGet("/applications", Func<string>(fun () -> "List of job applications will appear here")) |> ignore
     app.Run()
 
     0 // Exit code
