@@ -1,0 +1,10 @@
+{
+  "version": 2,
+  "dgSpecHash": "kASt3OY36U4=",
+  "success": true,
+  "projectFilePath": "C:\\Users\\User\\Documents\\GitHub\\careertrack\\src\\CareerTrack\\CareerTrack.fsproj",
+  "expectedPackageFiles": [
+    "C:\\Users\\User\\.nuget\\packages\\fsharp.core\\10.0.200-servicing.26103.119\\fsharp.core.10.0.200-servicing.26103.119.nupkg.sha512"
+  ],
+  "logs": []
+}
