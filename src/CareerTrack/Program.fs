@@ -5,6 +5,7 @@ open CareerTrack.Models
 
 [<EntryPoint>]
 let main args =
+
     let builder = WebApplication.CreateBuilder(args)
     let app = builder.Build()
 
@@ -35,13 +36,34 @@ let main args =
         }
     ]
 
-    app.MapGet("/", Func<string>(fun () -> "Hello World!")) |> ignore
+    app.MapGet("/", Func<string>(fun () ->
+        "Hello World!"
+    )) |> ignore
 
     app.MapGet("/applications", Func<Application list>(fun () ->
-    applications
+        applications
+    )) |> ignore
+
+    app.MapGet("/applications-page", Func<string>(fun () ->
+
+        let items =
+            applications
+            |> List.map (fun app -> $"<li>{app.Company} - {app.Position} ({app.Status})</li>")
+            |> String.concat ""
+
+        $"<html>
+            <head>
+                <title>CareerTrack Applications</title>
+            </head>
+            <body>
+                <h1>Job Applications</h1>
+                <ul>
+                    {items}
+                </ul>
+            </body>
+        </html>"
     )) |> ignore
 
     app.Run()
 
     0
-
