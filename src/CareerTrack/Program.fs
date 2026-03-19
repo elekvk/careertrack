@@ -37,40 +37,53 @@ let main args =
         }
     ]
 
+    // Kezdő oldal
     app.MapGet("/", Func<IResult>(fun () ->
         Results.Content("<h1>Hello World!</h1>", "text/html")
     )) |> ignore
 
+    // JSON endpoint
     app.MapGet("/applications", Func<Application list>(fun () ->
         applications
     )) |> ignore
 
+    // Lista oldal
     app.MapGet("/applications-page", Func<IResult>(fun () ->
 
         let rows =
             applications
             |> List.map (fun app ->
+
+                let color =
+                    match app.Status with
+                    | "Applied" -> "green"
+                    | "Interview" -> "orange"
+                    | "Rejected" -> "red"
+                    | _ -> "black"
+
                 $"<tr>
                     <td>{app.Company}</td>
                     <td>{app.Position}</td>
-                    <td>{app.Status}</td>
-                </tr>")
+                    <td style='color:{color}; font-weight:bold;'>{app.Status}</td>
+                </tr>"
+            )
             |> String.concat ""
 
         let html = $"""
 <html>
 <head>
+    <meta charset="UTF-8">
     <title>CareerTrack Applications</title>
 </head>
 <body>
 
-<h1>Job Applications</h1>
+<h1 style="text-align:center;">Álláspályázatok</h1>
 
-<table border="1" cellpadding="10">
+<table border="1" cellpadding="10" style="margin:auto;">
     <tr>
-        <th>Company</th>
-        <th>Position</th>
-        <th>Status</th>
+        <th>Vállalat</th>
+        <th>Pozíció</th>
+        <th>Állapot</th>
     </tr>
 
     {rows}
@@ -79,7 +92,7 @@ let main args =
 
 <br/>
 
-<a href="/add-application">Add new application</a>
+<a href="/add-application">Új alkalmazás hozzáadása</a>
 
 </body>
 </html>
@@ -88,54 +101,56 @@ let main args =
         Results.Content(html, "text/html")
     )) |> ignore
 
+    // Űrlap oldal
     app.MapGet("/add-application", Func<IResult>(fun () ->
 
         let html = """
 <html>
 <head>
-<title>Add Application</title>
+    <meta charset="UTF-8">
+    <title>Új alkalmazás</title>
 </head>
 <body>
 
-<h1>Add New Application</h1>
+<h1>Új alkalmazás hozzáadása</h1>
 
 <form method="post" action="/applications">
 
 <div>
-<label>Company:</label><br/>
+<label>Vállalat:</label><br/>
 <input type="text" name="company"/>
 </div>
 
 <br/>
 
 <div>
-<label>Position:</label><br/>
+<label>Pozíció:</label><br/>
 <input type="text" name="position"/>
 </div>
 
 <br/>
 
 <div>
-<label>Status:</label><br/>
+<label>Állapot:</label><br/>
 <input type="text" name="status"/>
 </div>
 
 <br/>
 
 <div>
-<label>Notes:</label><br/>
+<label>Megjegyzések:</label><br/>
 <textarea name="notes"></textarea>
 </div>
 
 <br/>
 
-<button type="submit">Save Application</button>
+<button type="submit">Alkalmazás mentése</button>
 
 </form>
 
 <br/>
 
-<a href="/applications-page">Back to list</a>
+<a href="/applications-page">Vissza a listához</a>
 
 </body>
 </html>
@@ -144,6 +159,7 @@ let main args =
         Results.Content(html, "text/html")
     )) |> ignore
 
+    // POST feldolgozás
     app.MapPost("/applications", Func<HttpRequest, IResult>(fun request ->
 
         let company =
@@ -161,20 +177,21 @@ let main args =
         let html = $"""
 <html>
 <head>
-<title>Application Saved</title>
+    <meta charset="UTF-8">
+    <title>Siker</title>
 </head>
 <body>
 
-<h1>Application received</h1>
+<h1>Alkalmazás mentve</h1>
 
-<p><b>Company:</b> {company}</p>
-<p><b>Position:</b> {position}</p>
-<p><b>Status:</b> {status}</p>
-<p><b>Notes:</b> {notes}</p>
+<p><b>Vállalat:</b> {company}</p>
+<p><b>Pozíció:</b> {position}</p>
+<p><b>Állapot:</b> {status}</p>
+<p><b>Megjegyzések:</b> {notes}</p>
 
 <br/>
 
-<a href="/applications-page">Back to applications</a>
+<a href="/applications-page">Vissza a listához</a>
 
 </body>
 </html>
