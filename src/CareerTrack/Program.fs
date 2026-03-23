@@ -78,7 +78,7 @@ let main args =
                 "<td style=\"color:" + color + "; font-weight:bold;\">" + a.Status + "</td>" +
                 "<td>" + a.DateApplied.ToString("yyyy-MM-dd") + "</td>" +
                 "<td>" + a.Notes + "</td>" +
-                "<td><a href=\"/delete/" + string a.Id + "\">Delete</a></td>" +
+                "<td><a href=\"/application/" + string a.Id + "\">View</a> | <a href=\"/delete/" + string a.Id + "\">Delete</a></td>" +
                 "</tr>"
             )
             |> String.concat ""
@@ -92,6 +92,37 @@ let main args =
             "</table>"
 
         htmlPage "Applications" body
+    )) |> ignore
+
+    app.MapGet("/application/{id}", Func<int, IResult>(fun id ->
+        let item =
+            applications
+            |> Seq.tryFind (fun a -> a.Id = id)
+
+        match item with
+        | Some a ->
+            let color =
+                match a.Status with
+                | "Applied" -> "green"
+                | "Interview" -> "orange"
+                | "Rejected" -> "red"
+                | _ -> "black"
+
+            let body =
+                "<h1>Application Details</h1>" +
+                "<p><b>Company:</b> " + a.Company + "</p>" +
+                "<p><b>Position:</b> " + a.Position + "</p>" +
+                "<p><b>Status:</b> <span style=\"color:" + color + "; font-weight:bold;\">" + a.Status + "</span></p>" +
+                "<p><b>Date applied:</b> " + a.DateApplied.ToString("yyyy-MM-dd") + "</p>" +
+                "<p><b>Notes:</b> " + a.Notes + "</p>" +
+                "<br/>" +
+                "<a href=\"/applications-page\">Back to list</a>"
+
+            htmlPage "Application Details" body
+        | None ->
+            htmlPage
+                "Not Found"
+                "<h1>Not Found</h1><p>Application not found.</p><a href=\"/applications-page\">Back to list</a>"
     )) |> ignore
 
     app.MapGet("/add-application", Func<IResult>(fun () ->
