@@ -10,12 +10,14 @@ let main args =
     let builder = WebApplication.CreateBuilder(args)
     let app = builder.Build()
 
+    // helper HTML function
     let htmlPage title body =
         Results.Content(
             "<html><head><meta charset=\"UTF-8\"><title>" + title + "</title></head><body>" + body + "</body></html>",
             "text/html; charset=utf-8"
         )
 
+    // in-memory data
     let applications = ResizeArray<Application>()
 
     applications.Add(
@@ -51,20 +53,25 @@ let main args =
         }
     )
 
+    // HOME
     app.MapGet("/", Func<IResult>(fun () ->
         htmlPage
             "CareerTrack"
-            "<h1>Hello World!</h1><p><a href=\"/applications-page\">Tovább az álláspályázatokhoz</a></p>"
+            "<h1>Hello World!</h1><p><a href=\"/applications-page\">Go to applications</a></p>"
     )) |> ignore
 
+    // API
     app.MapGet("/applications", Func<Application list>(fun () ->
         applications |> Seq.toList
     )) |> ignore
 
+    // LIST PAGE
     app.MapGet("/applications-page", Func<IResult>(fun () ->
+
         let rows =
             applications
             |> Seq.map (fun a ->
+
                 let color =
                     match a.Status with
                     | "Applied" -> "green"
@@ -83,37 +90,40 @@ let main args =
             |> String.concat ""
 
         let body =
-            "<h1 style=\"text-align:center;\">Álláspályázatok</h1>" +
-            "<div style=\"text-align:center; margin-bottom:20px;\"><a href=\"/add-application\">Új alkalmazás hozzáadása</a></div>" +
+            "<h1 style=\"text-align:center;\">Job Applications</h1>" +
+            "<div style=\"text-align:center; margin-bottom:20px;\"><a href=\"/add-application\">Add new application</a></div>" +
             "<table border=\"1\" cellpadding=\"10\" style=\"margin:auto; border-collapse:collapse;\">" +
-            "<tr><th>Vállalat</th><th>Pozíció</th><th>Állapot</th><th>Dátum</th><th>Megjegyzés</th></tr>" +
+            "<tr><th>Company</th><th>Position</th><th>Status</th><th>Date</th><th>Notes</th></tr>" +
             rows +
             "</table>"
 
-        htmlPage "Álláspályázatok" body
+        htmlPage "Applications" body
     )) |> ignore
 
+    // FORM PAGE
     app.MapGet("/add-application", Func<IResult>(fun () ->
         let body =
-            "<h1>Új alkalmazás hozzáadása</h1>" +
+            "<h1>Add New Application</h1>" +
             "<form method=\"post\" action=\"/applications\">" +
-            "<div><label>Vállalat:</label><br/><input type=\"text\" name=\"company\" /></div><br/>" +
-            "<div><label>Pozíció:</label><br/><input type=\"text\" name=\"position\" /></div><br/>" +
-            "<div><label>Állapot:</label><br/>" +
+            "<div><label>Company:</label><br/><input type=\"text\" name=\"company\" /></div><br/>" +
+            "<div><label>Position:</label><br/><input type=\"text\" name=\"position\" /></div><br/>" +
+            "<div><label>Status:</label><br/>" +
             "<select name=\"status\">" +
             "<option value=\"Applied\">Applied</option>" +
             "<option value=\"Interview\">Interview</option>" +
             "<option value=\"Rejected\">Rejected</option>" +
             "</select></div><br/>" +
-            "<div><label>Megjegyzések:</label><br/><textarea name=\"notes\"></textarea></div><br/>" +
-            "<button type=\"submit\">Alkalmazás mentése</button>" +
+            "<div><label>Notes:</label><br/><textarea name=\"notes\"></textarea></div><br/>" +
+            "<button type=\"submit\">Save Application</button>" +
             "</form><br/>" +
-            "<a href=\"/applications-page\">Vissza a listához</a>"
+            "<a href=\"/applications-page\">Back to list</a>"
 
-        htmlPage "Új alkalmazás" body
+        htmlPage "Add Application" body
     )) |> ignore
 
+    // POST
     app.MapPost("/applications", Func<HttpRequest, IResult>(fun request ->
+
         let getField name defaultValue =
             if request.Form.ContainsKey(name) then
                 request.Form[name].ToString().Trim()
@@ -127,14 +137,12 @@ let main args =
 
         if String.IsNullOrWhiteSpace(company) || String.IsNullOrWhiteSpace(position) then
             htmlPage
-                "Hiba"
-                "<h1>Hiba</h1><p>A vállalat és a pozíció mező kitöltése kötelező.</p><a href=\"/add-application\">Vissza az űrlaphoz</a>"
+                "Error"
+                "<h1>Error</h1><p>Company and Position are required.</p><a href=\"/add-application\">Back</a>"
         else
             let newId =
-                if applications.Count = 0 then
-                    1
-                else
-                    (applications |> Seq.map (fun a -> a.Id) |> Seq.max) + 1
+                if applications.Count = 0 then 1
+                else (applications |> Seq.map (fun a -> a.Id) |> Seq.max) + 1
 
             let newApplication =
                 {
@@ -147,6 +155,7 @@ let main args =
                 }
 
             applications.Add(newApplication)
+
             Results.Redirect("/applications-page")
     )) |> ignore
 
