@@ -78,7 +78,7 @@ let main args =
                 "<td><span style=\"background-color:" + color + "; color:white; padding:4px 8px; border-radius:5px; font-weight:bold;\">" + a.Status + "</span></td>" +
                 "<td>" + a.DateApplied.ToString("yyyy-MM-dd") + "</td>" +
                 "<td>" + a.Notes + "</td>" +
-                "<td><a href=\"/application/" + string a.Id + "\">View</a> | <a href=\"/delete/" + string a.Id + "\">Delete</a></td>" +
+                "<td><a href=\"/application/" + string a.Id + "\">View</a> | <a href=\"/delete/" + string a.Id + "\" onclick=\"return confirm('Are you sure?')\">Delete</a></td>" +
                 "</tr>"
             )
             |> String.concat ""
@@ -112,7 +112,7 @@ let main args =
                 "<h1>Application Details</h1>" +
                 "<p><b>Company:</b> " + a.Company + "</p>" +
                 "<p><b>Position:</b> " + a.Position + "</p>" +
-                "<p><b>Status:</b> <span style=\"color:" + color + "; font-weight:bold;\">" + a.Status + "</span></p>" +
+                "<p><b>Status:</b> <span style=\"background-color:" + color + "; color:white; padding:4px 8px; border-radius:5px; font-weight:bold;\">" + a.Status + "</span></p>" +
                 "<p><b>Date applied:</b> " + a.DateApplied.ToString("yyyy-MM-dd") + "</p>" +
                 "<p><b>Notes:</b> " + a.Notes + "</p>" +
                 "<br/>" +
