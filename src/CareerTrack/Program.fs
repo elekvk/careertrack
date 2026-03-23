@@ -1,4 +1,5 @@
 open System
+open System.Collections.Generic
 open Microsoft.AspNetCore.Builder
 open Microsoft.Extensions.Hosting
 open Microsoft.AspNetCore.Http
@@ -6,11 +7,18 @@ open CareerTrack.Models
 
 [<EntryPoint>]
 let main args =
-
     let builder = WebApplication.CreateBuilder(args)
     let app = builder.Build()
 
-    let applications : Application list = [
+    let htmlPage title body =
+        Results.Content(
+            "<html><head><meta charset=\"UTF-8\"><title>" + title + "</title></head><body>" + body + "</body></html>",
+            "text/html; charset=utf-8"
+        )
+
+    let applications = ResizeArray<Application>()
+
+    applications.Add(
         {
             Id = 1
             Company = "Microsoft"
@@ -19,6 +27,9 @@ let main args =
             Status = "Applied"
             Notes = "Applied through company website"
         }
+    )
+
+    applications.Add(
         {
             Id = 2
             Company = "Google"
@@ -27,6 +38,9 @@ let main args =
             Status = "Interview"
             Notes = "HR screening completed"
         }
+    )
+
+    applications.Add(
         {
             Id = 3
             Company = "SAP"
@@ -35,171 +49,106 @@ let main args =
             Status = "Rejected"
             Notes = "Received rejection email"
         }
-    ]
+    )
 
-    // Kezdő oldal
     app.MapGet("/", Func<IResult>(fun () ->
-        Results.Content("<h1>Hello World!</h1>", "text/html")
+        htmlPage
+            "CareerTrack"
+            "<h1>Hello World!</h1><p><a href=\"/applications-page\">Tovább az álláspályázatokhoz</a></p>"
     )) |> ignore
 
-    // JSON endpoint
     app.MapGet("/applications", Func<Application list>(fun () ->
-        applications
+        applications |> Seq.toList
     )) |> ignore
 
-    // Lista oldal
     app.MapGet("/applications-page", Func<IResult>(fun () ->
-
         let rows =
             applications
-            |> List.map (fun app ->
-
+            |> Seq.map (fun a ->
                 let color =
-                    match app.Status with
+                    match a.Status with
                     | "Applied" -> "green"
                     | "Interview" -> "orange"
                     | "Rejected" -> "red"
                     | _ -> "black"
 
-                $"<tr>
-                    <td>{app.Company}</td>
-                    <td>{app.Position}</td>
-                    <td style='color:{color}; font-weight:bold;'>{app.Status}</td>
-                </tr>"
+                "<tr>" +
+                "<td>" + a.Company + "</td>" +
+                "<td>" + a.Position + "</td>" +
+                "<td style=\"color:" + color + "; font-weight:bold;\">" + a.Status + "</td>" +
+                "<td>" + a.DateApplied.ToString("yyyy-MM-dd") + "</td>" +
+                "<td>" + a.Notes + "</td>" +
+                "</tr>"
             )
             |> String.concat ""
 
-        let html = $"""
-<html>
-<head>
-    <meta charset="UTF-8">
-    <title>CareerTrack Applications</title>
-</head>
-<body>
+        let body =
+            "<h1 style=\"text-align:center;\">Álláspályázatok</h1>" +
+            "<div style=\"text-align:center; margin-bottom:20px;\"><a href=\"/add-application\">Új alkalmazás hozzáadása</a></div>" +
+            "<table border=\"1\" cellpadding=\"10\" style=\"margin:auto; border-collapse:collapse;\">" +
+            "<tr><th>Vállalat</th><th>Pozíció</th><th>Állapot</th><th>Dátum</th><th>Megjegyzés</th></tr>" +
+            rows +
+            "</table>"
 
-<h1 style="text-align:center;">Álláspályázatok</h1>
-
-<table border="1" cellpadding="10" style="margin:auto;">
-    <tr>
-        <th>Vállalat</th>
-        <th>Pozíció</th>
-        <th>Állapot</th>
-    </tr>
-
-    {rows}
-
-</table>
-
-<br/>
-
-<a href="/add-application">Új alkalmazás hozzáadása</a>
-
-</body>
-</html>
-"""
-
-        Results.Content(html, "text/html")
+        htmlPage "Álláspályázatok" body
     )) |> ignore
 
-    // Űrlap oldal
     app.MapGet("/add-application", Func<IResult>(fun () ->
+        let body =
+            "<h1>Új alkalmazás hozzáadása</h1>" +
+            "<form method=\"post\" action=\"/applications\">" +
+            "<div><label>Vállalat:</label><br/><input type=\"text\" name=\"company\" /></div><br/>" +
+            "<div><label>Pozíció:</label><br/><input type=\"text\" name=\"position\" /></div><br/>" +
+            "<div><label>Állapot:</label><br/>" +
+            "<select name=\"status\">" +
+            "<option value=\"Applied\">Applied</option>" +
+            "<option value=\"Interview\">Interview</option>" +
+            "<option value=\"Rejected\">Rejected</option>" +
+            "</select></div><br/>" +
+            "<div><label>Megjegyzések:</label><br/><textarea name=\"notes\"></textarea></div><br/>" +
+            "<button type=\"submit\">Alkalmazás mentése</button>" +
+            "</form><br/>" +
+            "<a href=\"/applications-page\">Vissza a listához</a>"
 
-        let html = """
-<html>
-<head>
-    <meta charset="UTF-8">
-    <title>Új alkalmazás</title>
-</head>
-<body>
-
-<h1>Új alkalmazás hozzáadása</h1>
-
-<form method="post" action="/applications">
-
-<div>
-<label>Vállalat:</label><br/>
-<input type="text" name="company"/>
-</div>
-
-<br/>
-
-<div>
-<label>Pozíció:</label><br/>
-<input type="text" name="position"/>
-</div>
-
-<br/>
-
-<div>
-<label>Állapot:</label><br/>
-<input type="text" name="status"/>
-</div>
-
-<br/>
-
-<div>
-<label>Megjegyzések:</label><br/>
-<textarea name="notes"></textarea>
-</div>
-
-<br/>
-
-<button type="submit">Alkalmazás mentése</button>
-
-</form>
-
-<br/>
-
-<a href="/applications-page">Vissza a listához</a>
-
-</body>
-</html>
-"""
-
-        Results.Content(html, "text/html")
+        htmlPage "Új alkalmazás" body
     )) |> ignore
 
-    // POST feldolgozás
     app.MapPost("/applications", Func<HttpRequest, IResult>(fun request ->
+        let getField name defaultValue =
+            if request.Form.ContainsKey(name) then
+                request.Form[name].ToString().Trim()
+            else
+                defaultValue
 
-        let company =
-            if request.Form.ContainsKey("company") then request.Form["company"].ToString() else ""
+        let company = getField "company" ""
+        let position = getField "position" ""
+        let status = getField "status" "Applied"
+        let notes = getField "notes" ""
 
-        let position =
-            if request.Form.ContainsKey("position") then request.Form["position"].ToString() else ""
+        if String.IsNullOrWhiteSpace(company) || String.IsNullOrWhiteSpace(position) then
+            htmlPage
+                "Hiba"
+                "<h1>Hiba</h1><p>A vállalat és a pozíció mező kitöltése kötelező.</p><a href=\"/add-application\">Vissza az űrlaphoz</a>"
+        else
+            let newId =
+                if applications.Count = 0 then
+                    1
+                else
+                    (applications |> Seq.map (fun a -> a.Id) |> Seq.max) + 1
 
-        let status =
-            if request.Form.ContainsKey("status") then request.Form["status"].ToString() else ""
+            let newApplication =
+                {
+                    Id = newId
+                    Company = company
+                    Position = position
+                    DateApplied = DateTime.Now
+                    Status = status
+                    Notes = notes
+                }
 
-        let notes =
-            if request.Form.ContainsKey("notes") then request.Form["notes"].ToString() else ""
-
-        let html = $"""
-<html>
-<head>
-    <meta charset="UTF-8">
-    <title>Siker</title>
-</head>
-<body>
-
-<h1>Alkalmazás mentve</h1>
-
-<p><b>Vállalat:</b> {company}</p>
-<p><b>Pozíció:</b> {position}</p>
-<p><b>Állapot:</b> {status}</p>
-<p><b>Megjegyzések:</b> {notes}</p>
-
-<br/>
-
-<a href="/applications-page">Vissza a listához</a>
-
-</body>
-</html>
-"""
-
-        Results.Content(html, "text/html")
+            applications.Add(newApplication)
+            Results.Redirect("/applications-page")
     )) |> ignore
 
     app.Run()
-
     0
