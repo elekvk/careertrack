@@ -75,7 +75,7 @@ let main args =
                 "<tr>" +
                 "<td>" + a.Company + "</td>" +
                 "<td>" + a.Position + "</td>" +
-                "<td style=\"color:" + color + "; font-weight:bold;\">" + a.Status + "</td>" +
+                "<td><span style=\"background-color:" + color + "; color:white; padding:4px 8px; border-radius:5px; font-weight:bold;\">" + a.Status + "</span></td>" +
                 "<td>" + a.DateApplied.ToString("yyyy-MM-dd") + "</td>" +
                 "<td>" + a.Notes + "</td>" +
                 "<td><a href=\"/application/" + string a.Id + "\">View</a> | <a href=\"/delete/" + string a.Id + "\">Delete</a></td>" +
