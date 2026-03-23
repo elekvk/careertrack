@@ -10,14 +10,12 @@ let main args =
     let builder = WebApplication.CreateBuilder(args)
     let app = builder.Build()
 
-    // helper HTML function
     let htmlPage title body =
         Results.Content(
             "<html><head><meta charset=\"UTF-8\"><title>" + title + "</title></head><body>" + body + "</body></html>",
             "text/html; charset=utf-8"
         )
 
-    // in-memory data
     let applications = ResizeArray<Application>()
 
     applications.Add(
@@ -53,25 +51,20 @@ let main args =
         }
     )
 
-    // HOME
     app.MapGet("/", Func<IResult>(fun () ->
         htmlPage
             "CareerTrack"
             "<h1>Hello World!</h1><p><a href=\"/applications-page\">Go to applications</a></p>"
     )) |> ignore
 
-    // API
     app.MapGet("/applications", Func<Application list>(fun () ->
         applications |> Seq.toList
     )) |> ignore
 
-    // LIST PAGE
     app.MapGet("/applications-page", Func<IResult>(fun () ->
-
         let rows =
             applications
             |> Seq.map (fun a ->
-
                 let color =
                     match a.Status with
                     | "Applied" -> "green"
@@ -85,6 +78,7 @@ let main args =
                 "<td style=\"color:" + color + "; font-weight:bold;\">" + a.Status + "</td>" +
                 "<td>" + a.DateApplied.ToString("yyyy-MM-dd") + "</td>" +
                 "<td>" + a.Notes + "</td>" +
+                "<td><a href=\"/delete/" + string a.Id + "\">Delete</a></td>" +
                 "</tr>"
             )
             |> String.concat ""
@@ -93,14 +87,13 @@ let main args =
             "<h1 style=\"text-align:center;\">Job Applications</h1>" +
             "<div style=\"text-align:center; margin-bottom:20px;\"><a href=\"/add-application\">Add new application</a></div>" +
             "<table border=\"1\" cellpadding=\"10\" style=\"margin:auto; border-collapse:collapse;\">" +
-            "<tr><th>Company</th><th>Position</th><th>Status</th><th>Date</th><th>Notes</th></tr>" +
+            "<tr><th>Company</th><th>Position</th><th>Status</th><th>Date</th><th>Notes</th><th>Action</th></tr>" +
             rows +
             "</table>"
 
         htmlPage "Applications" body
     )) |> ignore
 
-    // FORM PAGE
     app.MapGet("/add-application", Func<IResult>(fun () ->
         let body =
             "<h1>Add New Application</h1>" +
@@ -121,9 +114,7 @@ let main args =
         htmlPage "Add Application" body
     )) |> ignore
 
-    // POST
     app.MapPost("/applications", Func<HttpRequest, IResult>(fun request ->
-
         let getField name defaultValue =
             if request.Form.ContainsKey(name) then
                 request.Form[name].ToString().Trim()
@@ -141,8 +132,10 @@ let main args =
                 "<h1>Error</h1><p>Company and Position are required.</p><a href=\"/add-application\">Back</a>"
         else
             let newId =
-                if applications.Count = 0 then 1
-                else (applications |> Seq.map (fun a -> a.Id) |> Seq.max) + 1
+                if applications.Count = 0 then
+                    1
+                else
+                    (applications |> Seq.map (fun a -> a.Id) |> Seq.max) + 1
 
             let newApplication =
                 {
@@ -155,8 +148,22 @@ let main args =
                 }
 
             applications.Add(newApplication)
-
             Results.Redirect("/applications-page")
+    )) |> ignore
+
+    app.MapGet("/delete/{id}", Func<int, IResult>(fun id ->
+        let itemToRemove =
+            applications
+            |> Seq.tryFind (fun a -> a.Id = id)
+
+        match itemToRemove with
+        | Some appToDelete ->
+            applications.Remove(appToDelete) |> ignore
+            Results.Redirect("/applications-page")
+        | None ->
+            htmlPage
+                "Not Found"
+                "<h1>Not Found</h1><p>Application not found.</p><a href=\"/applications-page\">Back to list</a>"
     )) |> ignore
 
     app.Run()
