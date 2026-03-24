@@ -78,7 +78,7 @@ let main args =
                 "<td><span style=\"background-color:" + color + "; color:white; padding:4px 8px; border-radius:5px; font-weight:bold;\">" + a.Status + "</span></td>" +
                 "<td>" + a.DateApplied.ToString("yyyy-MM-dd") + "</td>" +
                 "<td>" + a.Notes + "</td>" +
-                "<td><a href=\"/application/" + string a.Id + "\">View</a> | <a href=\"/delete/" + string a.Id + "\" onclick=\"return confirm('Are you sure?')\">Delete</a></td>" +
+                "<td><a href=\"/application/" + string a.Id + "\">View</a> | <a href=\"/edit/" + string a.Id + "\">Edit</a> | <a href=\"/delete/" + string a.Id + "\" onclick=\"return confirm('Are you sure?')\">Delete</a></td>" +
                 "</tr>"
             )
             |> String.concat ""
@@ -96,8 +96,7 @@ let main args =
 
     app.MapGet("/application/{id}", Func<int, IResult>(fun id ->
         let item =
-            applications
-            |> Seq.tryFind (fun a -> a.Id = id)
+            applications |> Seq.tryFind (fun a -> a.Id = id)
 
         match item with
         | Some a ->
@@ -163,10 +162,8 @@ let main args =
                 "<h1>Error</h1><p>Company and Position are required.</p><a href=\"/add-application\">Back</a>"
         else
             let newId =
-                if applications.Count = 0 then
-                    1
-                else
-                    (applications |> Seq.map (fun a -> a.Id) |> Seq.max) + 1
+                if applications.Count = 0 then 1
+                else (applications |> Seq.map (fun a -> a.Id) |> Seq.max) + 1
 
             let newApplication =
                 {
@@ -182,10 +179,80 @@ let main args =
             Results.Redirect("/applications-page")
     )) |> ignore
 
+    app.MapGet("/edit/{id}", Func<int, IResult>(fun id ->
+        let item =
+            applications |> Seq.tryFind (fun a -> a.Id = id)
+
+        match item with
+        | Some a ->
+            let selectedApplied = if a.Status = "Applied" then "selected" else ""
+            let selectedInterview = if a.Status = "Interview" then "selected" else ""
+            let selectedRejected = if a.Status = "Rejected" then "selected" else ""
+
+            let body =
+                "<h1>Edit Application</h1>" +
+                "<form method=\"post\" action=\"/update/" + string a.Id + "\">" +
+                "<div><label>Company:</label><br/><input type=\"text\" name=\"company\" value=\"" + a.Company + "\" /></div><br/>" +
+                "<div><label>Position:</label><br/><input type=\"text\" name=\"position\" value=\"" + a.Position + "\" /></div><br/>" +
+                "<div><label>Status:</label><br/>" +
+                "<select name=\"status\">" +
+                "<option value=\"Applied\" " + selectedApplied + ">Applied</option>" +
+                "<option value=\"Interview\" " + selectedInterview + ">Interview</option>" +
+                "<option value=\"Rejected\" " + selectedRejected + ">Rejected</option>" +
+                "</select></div><br/>" +
+                "<div><label>Notes:</label><br/><textarea name=\"notes\">" + a.Notes + "</textarea></div><br/>" +
+                "<button type=\"submit\">Update Application</button>" +
+                "</form><br/>" +
+                "<a href=\"/applications-page\">Back to list</a>"
+
+            htmlPage "Edit Application" body
+        | None ->
+            htmlPage
+                "Not Found"
+                "<h1>Not Found</h1><p>Application not found.</p><a href=\"/applications-page\">Back to list</a>"
+    )) |> ignore
+
+    app.MapPost("/update/{id}", Func<int, HttpRequest, IResult>(fun id request ->
+        let item =
+            applications |> Seq.tryFind (fun a -> a.Id = id)
+
+        let getField name defaultValue =
+            if request.Form.ContainsKey(name) then
+                request.Form[name].ToString().Trim()
+            else
+                defaultValue
+
+        match item with
+        | Some existing ->
+            let company = getField "company" existing.Company
+            let position = getField "position" existing.Position
+            let status = getField "status" existing.Status
+            let notes = getField "notes" existing.Notes
+
+            let index =
+                applications
+                |> Seq.findIndex (fun a -> a.Id = id)
+
+            applications.[index] <-
+                {
+                    Id = existing.Id
+                    Company = company
+                    Position = position
+                    DateApplied = existing.DateApplied
+                    Status = status
+                    Notes = notes
+                }
+
+            Results.Redirect("/applications-page")
+        | None ->
+            htmlPage
+                "Not Found"
+                "<h1>Not Found</h1><p>Application not found.</p><a href=\"/applications-page\">Back to list</a>"
+    )) |> ignore
+
     app.MapGet("/delete/{id}", Func<int, IResult>(fun id ->
         let itemToRemove =
-            applications
-            |> Seq.tryFind (fun a -> a.Id = id)
+            applications |> Seq.tryFind (fun a -> a.Id = id)
 
         match itemToRemove with
         | Some appToDelete ->
