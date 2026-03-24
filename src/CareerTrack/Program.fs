@@ -12,9 +12,33 @@ let main args =
 
     let htmlPage title body =
         Results.Content(
-            "<html><head><meta charset=\"UTF-8\"><title>" + title + "</title></head><body>" + body + "</body></html>",
+            "<html>" +
+            "<head>" +
+            "<meta charset=\"UTF-8\">" +
+            "<title>" + title + "</title>" +
+
+            "<style>" +
+            "body { font-family: Arial; background-color: #f4f6f8; margin:0; padding:0; }" +
+            "h1 { text-align:center; }" +
+            ".container { width: 80%; margin: auto; padding: 20px; }" +
+            "table { width: 100%; border-collapse: collapse; background:white; box-shadow:0 2px 8px rgba(0,0,0,0.1); }" +
+            "th, td { padding: 10px; border-bottom: 1px solid #ddd; text-align:left; }" +
+            "th { background-color: #2c3e50; color:white; }" +
+            "tr:hover { background-color: #f1f1f1; }" +
+            "a { text-decoration:none; color:#3498db; font-weight:bold; }" +
+            "a:hover { text-decoration:underline; }" +
+            ".btn { display:inline-block; padding:10px 15px; background:#3498db; color:white; border-radius:5px; }" +
+            ".btn:hover { background:#2980b9; }" +
+            "</style>" +
+
+            "</head>" +
+            "<body>" +
+            "<div class=\"container\">" +
+            body +
+            "</div>" +
+            "</body></html>",
             "text/html; charset=utf-8"
-        )
+       )   
 
     let applications = ResizeArray<Application>()
 
