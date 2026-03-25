@@ -12,33 +12,9 @@ let main args =
 
     let htmlPage title body =
         Results.Content(
-            "<html>" +
-            "<head>" +
-            "<meta charset=\"UTF-8\">" +
-            "<title>" + title + "</title>" +
-
-            "<style>" +
-            "body { font-family: Arial; background-color: #f4f6f8; margin:0; padding:0; }" +
-            "h1 { text-align:center; }" +
-            ".container { width: 80%; margin: auto; padding: 20px; }" +
-            "table { width: 100%; border-collapse: collapse; background:white; box-shadow:0 2px 8px rgba(0,0,0,0.1); }" +
-            "th, td { padding: 10px; border-bottom: 1px solid #ddd; text-align:left; }" +
-            "th { background-color: #2c3e50; color:white; }" +
-            "tr:hover { background-color: #f1f1f1; }" +
-            "a { text-decoration:none; color:#3498db; font-weight:bold; }" +
-            "a:hover { text-decoration:underline; }" +
-            ".btn { display:inline-block; padding:10px 15px; background:#3498db; color:white; border-radius:5px; }" +
-            ".btn:hover { background:#2980b9; }" +
-            "</style>" +
-
-            "</head>" +
-            "<body>" +
-            "<div class=\"container\">" +
-            body +
-            "</div>" +
-            "</body></html>",
+            "<html><head><meta charset=\"UTF-8\"><title>" + title + "</title></head><body>" + body + "</body></html>",
             "text/html; charset=utf-8"
-       )   
+        )
 
     let applications = ResizeArray<Application>()
 
@@ -85,9 +61,24 @@ let main args =
         applications |> Seq.toList
     )) |> ignore
 
-    app.MapGet("/applications-page", Func<IResult>(fun () ->
-        let rows =
+    app.MapGet("/applications-page", Func<HttpContext, IResult>(fun ctx ->
+        let search =
+            ctx.Request.Query["search"].ToString().Trim().ToLower()
+
+        let filteredApplications =
             applications
+            |> Seq.filter (fun a ->
+                if String.IsNullOrWhiteSpace(search) then
+                    true
+                else
+                    a.Company.ToLower().Contains(search) ||
+                    a.Position.ToLower().Contains(search) ||
+                    a.Status.ToLower().Contains(search) ||
+                    a.Notes.ToLower().Contains(search)
+            )
+
+        let rows =
+            filteredApplications
             |> Seq.map (fun a ->
                 let color =
                     match a.Status with
@@ -109,8 +100,15 @@ let main args =
 
         let body =
             "<h1 style=\"text-align:center;\">Job Applications</h1>" +
-            "<div style=\"text-align:center; margin-bottom:20px;\"><a href=\"/add-application\">Add new application</a></div>" +
-            "<table border=\"1\" cellpadding=\"10\" style=\"margin:auto; border-collapse:collapse;\">" +
+            "<div style=\"text-align:center; margin-bottom:20px;\">" +
+            "<a class=\"btn\" href=\"/add-application\">Add new application</a>" +
+            "</div>" +
+            "<form method=\"get\" action=\"/applications-page\" style=\"margin-bottom:20px; text-align:center;\">" +
+            "<input type=\"text\" name=\"search\" value=\"" + search + "\" placeholder=\"Search...\" style=\"padding:8px; width:240px;\" /> " +
+            "<button type=\"submit\" class=\"btn\">Search</button> " +
+            "<a class=\"btn\" href=\"/applications-page\">Clear</a>" +
+            "</form>" +
+            "<table border=\"1\" cellpadding=\"10\" style=\"margin:auto; border-collapse:collapse; width:100%;\">" +
             "<tr><th>Company</th><th>Position</th><th>Status</th><th>Date</th><th>Notes</th><th>Action</th></tr>" +
             rows +
             "</table>"
@@ -186,8 +184,10 @@ let main args =
                 "<h1>Error</h1><p>Company and Position are required.</p><a href=\"/add-application\">Back</a>"
         else
             let newId =
-                if applications.Count = 0 then 1
-                else (applications |> Seq.map (fun a -> a.Id) |> Seq.max) + 1
+                if applications.Count = 0 then
+                    1
+                else
+                    (applications |> Seq.map (fun a -> a.Id) |> Seq.max) + 1
 
             let newApplication =
                 {
