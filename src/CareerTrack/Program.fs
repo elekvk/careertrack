@@ -1,9 +1,17 @@
 open System
-open System.Collections.Generic
 open Microsoft.AspNetCore.Builder
 open Microsoft.Extensions.Hosting
 open Microsoft.AspNetCore.Http
-open CareerTrack.Models
+
+type Application =
+    {
+        Id: int
+        Company: string
+        Position: string
+        DateApplied: DateTime
+        Status: string
+        Notes: string
+    }
 
 [<EntryPoint>]
 let main args =
@@ -12,7 +20,28 @@ let main args =
 
     let htmlPage title body =
         Results.Content(
-            "<html><head><meta charset=\"UTF-8\"><title>" + title + "</title></head><body>" + body + "</body></html>",
+            "<html>" +
+            "<head>" +
+            "<meta charset=\"UTF-8\">" +
+            "<title>" + title + "</title>" +
+            "<style>" +
+            "body { font-family: Arial; background-color: #f4f6f8; margin:0; padding:0; }" +
+            "h1 { text-align:center; }" +
+            ".container { width: 80%; margin: auto; padding: 20px; }" +
+            "table { width: 100%; border-collapse: collapse; background:white; box-shadow:0 2px 8px rgba(0,0,0,0.1); }" +
+            "th, td { padding: 10px; border-bottom: 1px solid #ddd; text-align:left; }" +
+            "th { background-color: #2c3e50; color:white; }" +
+            "tr:hover { background-color: #f1f1f1; }" +
+            "a { text-decoration:none; color:#3498db; font-weight:bold; }" +
+            "a:hover { text-decoration:underline; }" +
+            ".btn { display:inline-block; padding:10px 15px; background:#3498db; color:white; border-radius:5px; }" +
+            ".btn:hover { background:#2980b9; }" +
+            "input, select, textarea { padding:8px; width:300px; margin-bottom:10px; }" +
+            "</style>" +
+            "</head>" +
+            "<body><div class=\"container\">" +
+            body +
+            "</div></body></html>",
             "text/html; charset=utf-8"
         )
 
@@ -25,7 +54,7 @@ let main args =
             Position = "Backend Intern"
             DateApplied = DateTime(2026, 3, 1)
             Status = "Applied"
-            Notes = "Applied through company website"
+            Notes = "Applied through website"
         }
     )
 
@@ -36,7 +65,7 @@ let main args =
             Position = "Software Engineer Intern"
             DateApplied = DateTime(2026, 3, 3)
             Status = "Interview"
-            Notes = "HR screening completed"
+            Notes = "HR round done"
         }
     )
 
@@ -47,38 +76,45 @@ let main args =
             Position = "Junior Developer"
             DateApplied = DateTime(2026, 3, 5)
             Status = "Rejected"
-            Notes = "Received rejection email"
+            Notes = "Rejected email"
         }
     )
 
     app.MapGet("/", Func<IResult>(fun () ->
-        htmlPage
-            "CareerTrack"
-            "<h1>Hello World!</h1><p><a href=\"/applications-page\">Go to applications</a></p>"
-    )) |> ignore
+        let body =
+            "<h1>CareerTrack</h1>" +
+            "<p style=\"text-align:center;\"><a href=\"/applications-page\">Go to applications</a></p>"
 
-    app.MapGet("/applications", Func<Application list>(fun () ->
-        applications |> Seq.toList
+        htmlPage "Home" body
     )) |> ignore
 
     app.MapGet("/applications-page", Func<HttpContext, IResult>(fun ctx ->
-        let search =
-            ctx.Request.Query["search"].ToString().Trim().ToLower()
+        let search = ctx.Request.Query["search"].ToString().Trim().ToLower()
+        let statusFilter = ctx.Request.Query["status"].ToString()
 
-        let filteredApplications =
+        let filtered =
             applications
             |> Seq.filter (fun a ->
-                if String.IsNullOrWhiteSpace(search) then
-                    true
-                else
-                    a.Company.ToLower().Contains(search) ||
-                    a.Position.ToLower().Contains(search) ||
-                    a.Status.ToLower().Contains(search) ||
-                    a.Notes.ToLower().Contains(search)
+                let matchesSearch =
+                    if String.IsNullOrWhiteSpace(search) then
+                        true
+                    else
+                        a.Company.ToLower().Contains(search)
+                        || a.Position.ToLower().Contains(search)
+                        || a.Status.ToLower().Contains(search)
+                        || a.Notes.ToLower().Contains(search)
+
+                let matchesStatus =
+                    if String.IsNullOrWhiteSpace(statusFilter) then
+                        true
+                    else
+                        a.Status = statusFilter
+
+                matchesSearch && matchesStatus
             )
 
         let rows =
-            filteredApplications
+            filtered
             |> Seq.map (fun a ->
                 let color =
                     match a.Status with
@@ -90,25 +126,30 @@ let main args =
                 "<tr>" +
                 "<td>" + a.Company + "</td>" +
                 "<td>" + a.Position + "</td>" +
-                "<td><span style=\"background-color:" + color + "; color:white; padding:4px 8px; border-radius:5px; font-weight:bold;\">" + a.Status + "</span></td>" +
+                "<td><span style=\"background:" + color + ";color:white;padding:4px 8px;border-radius:5px;\">" + a.Status + "</span></td>" +
                 "<td>" + a.DateApplied.ToString("yyyy-MM-dd") + "</td>" +
                 "<td>" + a.Notes + "</td>" +
-                "<td><a href=\"/application/" + string a.Id + "\">View</a> | <a href=\"/edit/" + string a.Id + "\">Edit</a> | <a href=\"/delete/" + string a.Id + "\" onclick=\"return confirm('Are you sure?')\">Delete</a></td>" +
+                "<td><a href=\"/edit/" + string a.Id + "\">Edit</a> | <a href=\"/delete/" + string a.Id + "\" onclick=\"return confirm('Are you sure?')\">Delete</a></td>" +
                 "</tr>"
             )
             |> String.concat ""
 
         let body =
-            "<h1 style=\"text-align:center;\">Job Applications</h1>" +
-            "<div style=\"text-align:center; margin-bottom:20px;\">" +
-            "<a class=\"btn\" href=\"/add-application\">Add new application</a>" +
+            "<h1>Job Applications</h1>" +
+            "<div style=\"text-align:center;margin-bottom:20px;\">" +
+            "<a class=\"btn\" href=\"/add-application\">+ Add Application</a>" +
             "</div>" +
-            "<form method=\"get\" action=\"/applications-page\" style=\"margin-bottom:20px; text-align:center;\">" +
-            "<input type=\"text\" name=\"search\" value=\"" + search + "\" placeholder=\"Search...\" style=\"padding:8px; width:240px;\" /> " +
-            "<button type=\"submit\" class=\"btn\">Search</button> " +
-            "<a class=\"btn\" href=\"/applications-page\">Clear</a>" +
+            "<form method=\"get\" action=\"/applications-page\" style=\"text-align:center;margin-bottom:20px;\">" +
+            "<input name=\"search\" value=\"" + search + "\" placeholder=\"Search\" /> " +
+            "<select name=\"status\">" +
+            "<option value=\"\">All</option>" +
+            "<option value=\"Applied\">Applied</option>" +
+            "<option value=\"Interview\">Interview</option>" +
+            "<option value=\"Rejected\">Rejected</option>" +
+            "</select> " +
+            "<button class=\"btn\" type=\"submit\">Filter</button>" +
             "</form>" +
-            "<table border=\"1\" cellpadding=\"10\" style=\"margin:auto; border-collapse:collapse; width:100%;\">" +
+            "<table>" +
             "<tr><th>Company</th><th>Position</th><th>Status</th><th>Date</th><th>Notes</th><th>Action</th></tr>" +
             rows +
             "</table>"
@@ -116,91 +157,42 @@ let main args =
         htmlPage "Applications" body
     )) |> ignore
 
-    app.MapGet("/application/{id}", Func<int, IResult>(fun id ->
-        let item =
-            applications |> Seq.tryFind (fun a -> a.Id = id)
-
-        match item with
-        | Some a ->
-            let color =
-                match a.Status with
-                | "Applied" -> "green"
-                | "Interview" -> "orange"
-                | "Rejected" -> "red"
-                | _ -> "black"
-
-            let body =
-                "<h1>Application Details</h1>" +
-                "<p><b>Company:</b> " + a.Company + "</p>" +
-                "<p><b>Position:</b> " + a.Position + "</p>" +
-                "<p><b>Status:</b> <span style=\"background-color:" + color + "; color:white; padding:4px 8px; border-radius:5px; font-weight:bold;\">" + a.Status + "</span></p>" +
-                "<p><b>Date applied:</b> " + a.DateApplied.ToString("yyyy-MM-dd") + "</p>" +
-                "<p><b>Notes:</b> " + a.Notes + "</p>" +
-                "<br/>" +
-                "<a href=\"/applications-page\">Back to list</a>"
-
-            htmlPage "Application Details" body
-        | None ->
-            htmlPage
-                "Not Found"
-                "<h1>Not Found</h1><p>Application not found.</p><a href=\"/applications-page\">Back to list</a>"
-    )) |> ignore
-
     app.MapGet("/add-application", Func<IResult>(fun () ->
         let body =
-            "<h1>Add New Application</h1>" +
+            "<h1>Add Application</h1>" +
             "<form method=\"post\" action=\"/applications\">" +
-            "<div><label>Company:</label><br/><input type=\"text\" name=\"company\" /></div><br/>" +
-            "<div><label>Position:</label><br/><input type=\"text\" name=\"position\" /></div><br/>" +
-            "<div><label>Status:</label><br/>" +
+            "<input name=\"company\" placeholder=\"Company\" /><br/>" +
+            "<input name=\"position\" placeholder=\"Position\" /><br/>" +
             "<select name=\"status\">" +
             "<option value=\"Applied\">Applied</option>" +
             "<option value=\"Interview\">Interview</option>" +
             "<option value=\"Rejected\">Rejected</option>" +
-            "</select></div><br/>" +
-            "<div><label>Notes:</label><br/><textarea name=\"notes\"></textarea></div><br/>" +
-            "<button type=\"submit\">Save Application</button>" +
-            "</form><br/>" +
-            "<a href=\"/applications-page\">Back to list</a>"
+            "</select><br/>" +
+            "<textarea name=\"notes\" placeholder=\"Notes\"></textarea><br/>" +
+            "<button class=\"btn\" type=\"submit\">Save</button>" +
+            "</form>" +
+            "<p><a href=\"/applications-page\">Back to list</a></p>"
 
         htmlPage "Add Application" body
     )) |> ignore
 
-    app.MapPost("/applications", Func<HttpRequest, IResult>(fun request ->
-        let getField name defaultValue =
-            if request.Form.ContainsKey(name) then
-                request.Form[name].ToString().Trim()
-            else
-                defaultValue
+    app.MapPost("/applications", Func<HttpRequest, IResult>(fun req ->
+        let get name =
+            if req.Form.ContainsKey(name) then req.Form[name].ToString()
+            else ""
 
-        let company = getField "company" ""
-        let position = getField "position" ""
-        let status = getField "status" "Applied"
-        let notes = getField "notes" ""
+        let newApp =
+            {
+                Id = applications.Count + 1
+                Company = get "company"
+                Position = get "position"
+                DateApplied = DateTime.Now
+                Status = get "status"
+                Notes = get "notes"
+            }
 
-        if String.IsNullOrWhiteSpace(company) || String.IsNullOrWhiteSpace(position) then
-            htmlPage
-                "Error"
-                "<h1>Error</h1><p>Company and Position are required.</p><a href=\"/add-application\">Back</a>"
-        else
-            let newId =
-                if applications.Count = 0 then
-                    1
-                else
-                    (applications |> Seq.map (fun a -> a.Id) |> Seq.max) + 1
-
-            let newApplication =
-                {
-                    Id = newId
-                    Company = company
-                    Position = position
-                    DateApplied = DateTime.Now
-                    Status = status
-                    Notes = notes
-                }
-
-            applications.Add(newApplication)
-            Results.Redirect("/applications-page")
+        applications.Add(newApp)
+        Results.Redirect("/applications-page")
     )) |> ignore
 
     app.MapGet("/edit/{id}", Func<int, IResult>(fun id ->
@@ -216,76 +208,53 @@ let main args =
             let body =
                 "<h1>Edit Application</h1>" +
                 "<form method=\"post\" action=\"/update/" + string a.Id + "\">" +
-                "<div><label>Company:</label><br/><input type=\"text\" name=\"company\" value=\"" + a.Company + "\" /></div><br/>" +
-                "<div><label>Position:</label><br/><input type=\"text\" name=\"position\" value=\"" + a.Position + "\" /></div><br/>" +
-                "<div><label>Status:</label><br/>" +
+                "<input name=\"company\" value=\"" + a.Company + "\" /><br/>" +
+                "<input name=\"position\" value=\"" + a.Position + "\" /><br/>" +
                 "<select name=\"status\">" +
                 "<option value=\"Applied\" " + selectedApplied + ">Applied</option>" +
                 "<option value=\"Interview\" " + selectedInterview + ">Interview</option>" +
                 "<option value=\"Rejected\" " + selectedRejected + ">Rejected</option>" +
-                "</select></div><br/>" +
-                "<div><label>Notes:</label><br/><textarea name=\"notes\">" + a.Notes + "</textarea></div><br/>" +
-                "<button type=\"submit\">Update Application</button>" +
-                "</form><br/>" +
-                "<a href=\"/applications-page\">Back to list</a>"
+                "</select><br/>" +
+                "<textarea name=\"notes\">" + a.Notes + "</textarea><br/>" +
+                "<button class=\"btn\" type=\"submit\">Update</button>" +
+                "</form>" +
+                "<p><a href=\"/applications-page\">Back to list</a></p>"
 
             htmlPage "Edit Application" body
         | None ->
-            htmlPage
-                "Not Found"
-                "<h1>Not Found</h1><p>Application not found.</p><a href=\"/applications-page\">Back to list</a>"
+            htmlPage "Not found" "<h1>Application not found</h1><p><a href=\"/applications-page\">Back to list</a></p>"
     )) |> ignore
 
-    app.MapPost("/update/{id}", Func<int, HttpRequest, IResult>(fun id request ->
-        let item =
+    app.MapPost("/update/{id}", Func<int, HttpRequest, IResult>(fun id req ->
+        let get name fallback =
+            if req.Form.ContainsKey(name) then req.Form[name].ToString()
+            else fallback
+
+        let existing =
             applications |> Seq.tryFind (fun a -> a.Id = id)
 
-        let getField name defaultValue =
-            if request.Form.ContainsKey(name) then
-                request.Form[name].ToString().Trim()
-            else
-                defaultValue
-
-        match item with
-        | Some existing ->
-            let company = getField "company" existing.Company
-            let position = getField "position" existing.Position
-            let status = getField "status" existing.Status
-            let notes = getField "notes" existing.Notes
-
-            let index =
-                applications
-                |> Seq.findIndex (fun a -> a.Id = id)
+        match existing with
+        | Some oldItem ->
+            let index = applications |> Seq.findIndex (fun a -> a.Id = id)
 
             applications.[index] <-
                 {
-                    Id = existing.Id
-                    Company = company
-                    Position = position
-                    DateApplied = existing.DateApplied
-                    Status = status
-                    Notes = notes
+                    Id = oldItem.Id
+                    Company = get "company" oldItem.Company
+                    Position = get "position" oldItem.Position
+                    DateApplied = oldItem.DateApplied
+                    Status = get "status" oldItem.Status
+                    Notes = get "notes" oldItem.Notes
                 }
 
             Results.Redirect("/applications-page")
         | None ->
-            htmlPage
-                "Not Found"
-                "<h1>Not Found</h1><p>Application not found.</p><a href=\"/applications-page\">Back to list</a>"
+            htmlPage "Not found" "<h1>Application not found</h1><p><a href=\"/applications-page\">Back to list</a></p>"
     )) |> ignore
 
     app.MapGet("/delete/{id}", Func<int, IResult>(fun id ->
-        let itemToRemove =
-            applications |> Seq.tryFind (fun a -> a.Id = id)
-
-        match itemToRemove with
-        | Some appToDelete ->
-            applications.Remove(appToDelete) |> ignore
-            Results.Redirect("/applications-page")
-        | None ->
-            htmlPage
-                "Not Found"
-                "<h1>Not Found</h1><p>Application not found.</p><a href=\"/applications-page\">Back to list</a>"
+        applications.RemoveAll(fun a -> a.Id = id) |> ignore
+        Results.Redirect("/applications-page")
     )) |> ignore
 
     app.Run()
