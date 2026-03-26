@@ -34,9 +34,10 @@ let main args =
             "tr:hover { background-color: #f1f1f1; }" +
             "a { text-decoration:none; color:#3498db; font-weight:bold; }" +
             "a:hover { text-decoration:underline; }" +
-            ".btn { display:inline-block; padding:10px 15px; background:#3498db; color:white; border-radius:5px; }" +
+            ".btn { display:inline-block; padding:10px 15px; background:#3498db; color:white; border-radius:5px; border:none; cursor:pointer; }" +
             ".btn:hover { background:#2980b9; }" +
             "input, select, textarea { padding:8px; width:300px; margin-bottom:10px; }" +
+            ".stats { text-align:center; margin-bottom:20px; font-size:18px; }" +
             "</style>" +
             "</head>" +
             "<body><div class=\"container\">" +
@@ -88,6 +89,10 @@ let main args =
         htmlPage "Home" body
     )) |> ignore
 
+    app.MapGet("/applications", Func<Application list>(fun () ->
+        applications |> Seq.toList
+    )) |> ignore
+
     app.MapGet("/applications-page", Func<HttpContext, IResult>(fun ctx ->
         let search = ctx.Request.Query["search"].ToString().Trim().ToLower()
         let statusFilter = ctx.Request.Query["status"].ToString()
@@ -113,6 +118,15 @@ let main args =
                 matchesSearch && matchesStatus
             )
 
+        let appliedCount =
+            filtered |> Seq.filter (fun a -> a.Status = "Applied") |> Seq.length
+
+        let interviewCount =
+            filtered |> Seq.filter (fun a -> a.Status = "Interview") |> Seq.length
+
+        let rejectedCount =
+            filtered |> Seq.filter (fun a -> a.Status = "Rejected") |> Seq.length
+
         let rows =
             filtered
             |> Seq.map (fun a ->
@@ -129,13 +143,18 @@ let main args =
                 "<td><span style=\"background:" + color + ";color:white;padding:4px 8px;border-radius:5px;\">" + a.Status + "</span></td>" +
                 "<td>" + a.DateApplied.ToString("yyyy-MM-dd") + "</td>" +
                 "<td>" + a.Notes + "</td>" +
-                "<td><a href=\"/edit/" + string a.Id + "\">Edit</a> | <a href=\"/delete/" + string a.Id + "\" onclick=\"return confirm('Are you sure?')\">Delete</a></td>" +
+                "<td><a href=\"/application/" + string a.Id + "\">View</a> | <a href=\"/edit/" + string a.Id + "\">Edit</a> | <a href=\"/delete/" + string a.Id + "\" onclick=\"return confirm('Are you sure?')\">Delete</a></td>" +
                 "</tr>"
             )
             |> String.concat ""
 
         let body =
             "<h1>Job Applications</h1>" +
+            "<div class=\"stats\">" +
+            "<span style=\"color:green; font-weight:bold;\">Applied: " + string appliedCount + "</span> | " +
+            "<span style=\"color:orange; font-weight:bold;\">Interview: " + string interviewCount + "</span> | " +
+            "<span style=\"color:red; font-weight:bold;\">Rejected: " + string rejectedCount + "</span>" +
+            "</div>" +
             "<div style=\"text-align:center;margin-bottom:20px;\">" +
             "<a class=\"btn\" href=\"/add-application\">+ Add Application</a>" +
             "</div>" +
@@ -147,7 +166,8 @@ let main args =
             "<option value=\"Interview\">Interview</option>" +
             "<option value=\"Rejected\">Rejected</option>" +
             "</select> " +
-            "<button class=\"btn\" type=\"submit\">Filter</button>" +
+            "<button class=\"btn\" type=\"submit\">Filter</button> " +
+            "<a class=\"btn\" href=\"/applications-page\">Clear</a>" +
             "</form>" +
             "<table>" +
             "<tr><th>Company</th><th>Position</th><th>Status</th><th>Date</th><th>Notes</th><th>Action</th></tr>" +
@@ -155,6 +175,33 @@ let main args =
             "</table>"
 
         htmlPage "Applications" body
+    )) |> ignore
+
+    app.MapGet("/application/{id}", Func<int, IResult>(fun id ->
+        let item =
+            applications |> Seq.tryFind (fun a -> a.Id = id)
+
+        match item with
+        | Some a ->
+            let color =
+                match a.Status with
+                | "Applied" -> "green"
+                | "Interview" -> "orange"
+                | "Rejected" -> "red"
+                | _ -> "black"
+
+            let body =
+                "<h1>Application Details</h1>" +
+                "<p><b>Company:</b> " + a.Company + "</p>" +
+                "<p><b>Position:</b> " + a.Position + "</p>" +
+                "<p><b>Status:</b> <span style=\"background:" + color + ";color:white;padding:4px 8px;border-radius:5px;\">" + a.Status + "</span></p>" +
+                "<p><b>Date applied:</b> " + a.DateApplied.ToString("yyyy-MM-dd") + "</p>" +
+                "<p><b>Notes:</b> " + a.Notes + "</p>" +
+                "<p><a href=\"/applications-page\">Back to list</a></p>"
+
+            htmlPage "Details" body
+        | None ->
+            htmlPage "Not found" "<h1>Application not found</h1><p><a href=\"/applications-page\">Back to list</a></p>"
     )) |> ignore
 
     app.MapGet("/add-application", Func<IResult>(fun () ->
