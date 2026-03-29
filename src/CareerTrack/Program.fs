@@ -38,6 +38,8 @@ let main args =
             ".btn:hover { background:#2980b9; }" +
             "input, select, textarea { padding:8px; width:300px; margin-bottom:10px; }" +
             ".stats { text-align:center; margin-bottom:20px; font-size:18px; }" +
+            ".message { text-align:center; font-weight:bold; padding:10px; border-radius:6px; margin-bottom:20px; }" +
+            ".success { color:green; background:#eafaf1; }" +
             "</style>" +
             "</head>" +
             "<body><div class=\"container\">" +
@@ -96,6 +98,13 @@ let main args =
     app.MapGet("/applications-page", Func<HttpContext, IResult>(fun ctx ->
         let search = ctx.Request.Query["search"].ToString().Trim().ToLower()
         let statusFilter = ctx.Request.Query["status"].ToString()
+        let successMessage = ctx.Request.Query["success"].ToString()
+
+        let successHtml =
+            if String.IsNullOrWhiteSpace(successMessage) then
+                ""
+            else
+                "<div class=\"message success\">" + successMessage + "</div>"
 
         let filtered =
             applications
@@ -150,6 +159,7 @@ let main args =
 
         let body =
             "<h1>Job Applications</h1>" +
+            successHtml +
             "<div class=\"stats\">" +
             "<span style=\"color:green; font-weight:bold;\">Applied: " + string appliedCount + "</span> | " +
             "<span style=\"color:orange; font-weight:bold;\">Interview: " + string interviewCount + "</span> | " +
@@ -239,7 +249,7 @@ let main args =
             }
 
         applications.Add(newApp)
-        Results.Redirect("/applications-page")
+        Results.Redirect("/applications-page?success=Application added successfully")
     )) |> ignore
 
     app.MapGet("/edit/{id}", Func<int, IResult>(fun id ->
@@ -294,14 +304,14 @@ let main args =
                     Notes = get "notes" oldItem.Notes
                 }
 
-            Results.Redirect("/applications-page")
+            Results.Redirect("/applications-page?success=Application updated successfully")
         | None ->
             htmlPage "Not found" "<h1>Application not found</h1><p><a href=\"/applications-page\">Back to list</a></p>"
     )) |> ignore
 
     app.MapGet("/delete/{id}", Func<int, IResult>(fun id ->
         applications.RemoveAll(fun a -> a.Id = id) |> ignore
-        Results.Redirect("/applications-page")
+        Results.Redirect("/applications-page?success=Application deleted successfully")
     )) |> ignore
 
     app.Run()
