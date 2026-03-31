@@ -166,7 +166,8 @@ let main args =
             "<span style=\"color:red; font-weight:bold;\">Rejected: " + string rejectedCount + "</span>" +
             "</div>" +
             "<div style=\"text-align:center;margin-bottom:20px;\">" +
-            "<a class=\"btn\" href=\"/add-application\">+ Add Application</a>" +
+            "<a class=\"btn\" href=\"/add-application\">+ Add Application</a> " +
+            "<a class=\"btn\" href=\"/stats\">View Statistics</a>" +
             "</div>" +
             "<form method=\"get\" action=\"/applications-page\" style=\"text-align:center;margin-bottom:20px;\">" +
             "<input name=\"search\" value=\"" + search + "\" placeholder=\"Search\" /> " +
@@ -312,6 +313,42 @@ let main args =
     app.MapGet("/delete/{id}", Func<int, IResult>(fun id ->
         applications.RemoveAll(fun a -> a.Id = id) |> ignore
         Results.Redirect("/applications-page?success=Application deleted successfully")
+    )) |> ignore
+
+    app.MapGet("/stats", Func<IResult>(fun () ->
+        let total = applications.Count
+
+        let applied =
+            applications |> Seq.filter (fun a -> a.Status = "Applied") |> Seq.length
+
+        let interview =
+            applications |> Seq.filter (fun a -> a.Status = "Interview") |> Seq.length
+
+        let rejected =
+            applications |> Seq.filter (fun a -> a.Status = "Rejected") |> Seq.length
+
+        let latest =
+            if applications.Count = 0 then
+                "N/A"
+            else
+                applications
+                |> Seq.maxBy (fun a -> a.DateApplied)
+                |> fun a -> a.DateApplied.ToString("yyyy-MM-dd")
+
+        let body =
+            "<h1>Statistics</h1>" +
+            "<div class=\"stats\">" +
+            "<p><b>Total applications:</b> " + string total + "</p>" +
+            "<p><b>Applied:</b> " + string applied + "</p>" +
+            "<p><b>Interview:</b> " + string interview + "</p>" +
+            "<p><b>Rejected:</b> " + string rejected + "</p>" +
+            "<p><b>Latest application:</b> " + latest + "</p>" +
+            "</div>" +
+            "<p style=\"text-align:center;\">" +
+            "<a class=\"btn\" href=\"/applications-page\">Back to applications</a>" +
+            "</p>"
+
+        htmlPage "Statistics" body
     )) |> ignore
 
     app.Run()
