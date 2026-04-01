@@ -99,6 +99,7 @@ let main args =
         let search = ctx.Request.Query["search"].ToString().Trim().ToLower()
         let statusFilter = ctx.Request.Query["status"].ToString()
         let successMessage = ctx.Request.Query["success"].ToString()
+        let sort = ctx.Request.Query["sort"].ToString()
 
         let successHtml =
             if String.IsNullOrWhiteSpace(successMessage) then
@@ -127,17 +128,22 @@ let main args =
                 matchesSearch && matchesStatus
             )
 
+        let sorted =
+            match sort with
+            | "company" -> filtered |> Seq.sortBy (fun a -> a.Company)
+            | _ -> filtered |> Seq.sortByDescending (fun a -> a.DateApplied)
+
         let appliedCount =
-            filtered |> Seq.filter (fun a -> a.Status = "Applied") |> Seq.length
+            sorted |> Seq.filter (fun a -> a.Status = "Applied") |> Seq.length
 
         let interviewCount =
-            filtered |> Seq.filter (fun a -> a.Status = "Interview") |> Seq.length
+            sorted |> Seq.filter (fun a -> a.Status = "Interview") |> Seq.length
 
         let rejectedCount =
-            filtered |> Seq.filter (fun a -> a.Status = "Rejected") |> Seq.length
+            sorted |> Seq.filter (fun a -> a.Status = "Rejected") |> Seq.length
 
         let rows =
-            filtered
+            sorted
             |> Seq.map (fun a ->
                 let color =
                     match a.Status with
@@ -156,6 +162,18 @@ let main args =
                 "</tr>"
             )
             |> String.concat ""
+
+        let selectedDate =
+            if String.IsNullOrWhiteSpace(sort) || sort = "date" then
+                "selected"
+            else
+                ""
+
+        let selectedCompany =
+            if sort = "company" then
+                "selected"
+            else
+                ""
 
         let body =
             "<h1>Job Applications</h1>" +
@@ -176,6 +194,10 @@ let main args =
             "<option value=\"Applied\">Applied</option>" +
             "<option value=\"Interview\">Interview</option>" +
             "<option value=\"Rejected\">Rejected</option>" +
+            "</select> " +
+            "<select name=\"sort\">" +
+            "<option value=\"date\" " + selectedDate + ">Date</option>" +
+            "<option value=\"company\" " + selectedCompany + ">Company</option>" +
             "</select> " +
             "<button class=\"btn\" type=\"submit\">Filter</button> " +
             "<a class=\"btn\" href=\"/applications-page\">Clear</a>" +
