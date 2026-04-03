@@ -50,6 +50,15 @@ let main args =
 
     let applications = ResizeArray<Application>()
 
+    let getNextId () =
+        if applications.Count = 0 then
+            1
+        else
+            applications
+            |> Seq.map (fun a -> a.Id)
+            |> Seq.max
+            |> fun maxId -> maxId + 1
+
     applications.Add(
         {
             Id = 1
@@ -263,7 +272,7 @@ let main args =
 
         let newApp =
             {
-                Id = applications.Count + 1
+                Id = getNextId ()
                 Company = get "company"
                 Position = get "position"
                 DateApplied = DateTime.Now
