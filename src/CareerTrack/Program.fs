@@ -40,6 +40,7 @@ let main args =
             ".stats { text-align:center; margin-bottom:20px; font-size:18px; }" +
             ".message { text-align:center; font-weight:bold; padding:10px; border-radius:6px; margin-bottom:20px; }" +
             ".success { color:green; background:#eafaf1; }" +
+            ".empty-message { text-align:center; background:white; padding:20px; border-radius:8px; box-shadow:0 2px 8px rgba(0,0,0,0.1); font-weight:bold; color:#555; }" +
             "</style>" +
             "</head>" +
             "<body><div class=\"container\">" +
@@ -184,6 +185,15 @@ let main args =
             else
                 ""
 
+        let applicationsContent =
+            if Seq.isEmpty sorted then
+                "<div class=\"empty-message\">No applications found</div>"
+            else
+                "<table>" +
+                "<tr><th>Company</th><th>Position</th><th>Status</th><th>Date</th><th>Notes</th><th>Action</th></tr>" +
+                rows +
+                "</table>"
+
         let body =
             "<h1>Job Applications</h1>" +
             successHtml +
@@ -211,10 +221,7 @@ let main args =
             "<button class=\"btn\" type=\"submit\">Filter</button> " +
             "<a class=\"btn\" href=\"/applications-page\">Clear</a>" +
             "</form>" +
-            "<table>" +
-            "<tr><th>Company</th><th>Position</th><th>Status</th><th>Date</th><th>Notes</th><th>Action</th></tr>" +
-            rows +
-            "</table>"
+            applicationsContent
 
         htmlPage "Applications" body
     )) |> ignore
