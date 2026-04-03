@@ -194,6 +194,30 @@ let main args =
             )
             |> String.concat ""
 
+        let selectedStatusAll =
+            if String.IsNullOrWhiteSpace(statusFilter) then
+                "selected"
+            else
+                ""
+
+        let selectedStatusApplied =
+            if statusFilter = "Applied" then
+                "selected"
+            else
+                ""
+
+        let selectedStatusInterview =
+            if statusFilter = "Interview" then
+                "selected"
+            else
+                ""
+
+        let selectedStatusRejected =
+            if statusFilter = "Rejected" then
+                "selected"
+            else
+                ""
+
         let selectedDate =
             if String.IsNullOrWhiteSpace(sort) || sort = "date" then
                 "selected"
@@ -231,10 +255,10 @@ let main args =
             "<form method=\"get\" action=\"/applications-page\" style=\"text-align:center;margin-bottom:20px;\">" +
             "<input name=\"search\" value=\"" + search + "\" placeholder=\"Search\" /> " +
             "<select name=\"status\">" +
-            "<option value=\"\">All</option>" +
-            "<option value=\"Applied\">Applied</option>" +
-            "<option value=\"Interview\">Interview</option>" +
-            "<option value=\"Rejected\">Rejected</option>" +
+            "<option value=\"\" " + selectedStatusAll + ">All</option>" +
+            "<option value=\"Applied\" " + selectedStatusApplied + ">Applied</option>" +
+            "<option value=\"Interview\" " + selectedStatusInterview + ">Interview</option>" +
+            "<option value=\"Rejected\" " + selectedStatusRejected + ">Rejected</option>" +
             "</select> " +
             "<select name=\"sort\">" +
             "<option value=\"date\" " + selectedDate + ">Date</option>" +
