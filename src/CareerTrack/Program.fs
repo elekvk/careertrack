@@ -40,6 +40,7 @@ let main args =
             ".stats { text-align:center; margin-bottom:20px; font-size:18px; }" +
             ".message { text-align:center; font-weight:bold; padding:10px; border-radius:6px; margin-bottom:20px; }" +
             ".success { color:green; background:#eafaf1; }" +
+            ".error { color:#b00020; background:#fdecea; }" +
             ".empty-message { text-align:center; background:white; padding:20px; border-radius:8px; box-shadow:0 2px 8px rgba(0,0,0,0.1); font-weight:bold; color:#555; }" +
             "</style>" +
             "</head>" +
@@ -59,6 +60,19 @@ let main args =
             |> Seq.map (fun a -> a.Id)
             |> Seq.max
             |> fun maxId -> maxId + 1
+
+    let isValidStatus status =
+        status = "Applied" || status = "Interview" || status = "Rejected"
+
+    let validateApplication company position status =
+        if String.IsNullOrWhiteSpace(company) then
+            Some "Company is required."
+        elif String.IsNullOrWhiteSpace(position) then
+            Some "Position is required."
+        elif not (isValidStatus status) then
+            Some "Invalid status selected."
+        else
+            None
 
     applications.Add(
         {
@@ -109,6 +123,7 @@ let main args =
         let search = ctx.Request.Query["search"].ToString().Trim().ToLower()
         let statusFilter = ctx.Request.Query["status"].ToString()
         let successMessage = ctx.Request.Query["success"].ToString()
+        let errorMessage = ctx.Request.Query["error"].ToString()
         let sort = ctx.Request.Query["sort"].ToString()
 
         let successHtml =
@@ -116,6 +131,12 @@ let main args =
                 ""
             else
                 "<div class=\"message success\">" + successMessage + "</div>"
+
+        let errorHtml =
+            if String.IsNullOrWhiteSpace(errorMessage) then
+                ""
+            else
+                "<div class=\"message error\">" + errorMessage + "</div>"
 
         let filtered =
             applications
@@ -197,6 +218,7 @@ let main args =
         let body =
             "<h1>Job Applications</h1>" +
             successHtml +
+            errorHtml +
             "<div class=\"stats\">" +
             "<span style=\"color:green; font-weight:bold;\">Applied: " + string appliedCount + "</span> | " +
             "<span style=\"color:orange; font-weight:bold;\">Interview: " + string interviewCount + "</span> | " +
@@ -253,9 +275,18 @@ let main args =
             htmlPage "Not found" "<h1>Application not found</h1><p><a href=\"/applications-page\">Back to list</a></p>"
     )) |> ignore
 
-    app.MapGet("/add-application", Func<IResult>(fun () ->
+    app.MapGet("/add-application", Func<HttpContext, IResult>(fun ctx ->
+        let errorMessage = ctx.Request.Query["error"].ToString()
+
+        let errorHtml =
+            if String.IsNullOrWhiteSpace(errorMessage) then
+                ""
+            else
+                "<div class=\"message error\">" + errorMessage + "</div>"
+
         let body =
             "<h1>Add Application</h1>" +
+            errorHtml +
             "<form method=\"post\" action=\"/applications\">" +
             "<input name=\"company\" placeholder=\"Company\" /><br/>" +
             "<input name=\"position\" placeholder=\"Position\" /><br/>" +
@@ -274,24 +305,35 @@ let main args =
 
     app.MapPost("/applications", Func<HttpRequest, IResult>(fun req ->
         let get name =
-            if req.Form.ContainsKey(name) then req.Form[name].ToString()
+            if req.Form.ContainsKey(name) then req.Form[name].ToString().Trim()
             else ""
 
-        let newApp =
-            {
-                Id = getNextId ()
-                Company = get "company"
-                Position = get "position"
-                DateApplied = DateTime.Now
-                Status = get "status"
-                Notes = get "notes"
-            }
+        let company = get "company"
+        let position = get "position"
+        let status = get "status"
+        let notes = get "notes"
 
-        applications.Add(newApp)
-        Results.Redirect("/applications-page?success=Application added successfully")
+        match validateApplication company position status with
+        | Some error ->
+            Results.Redirect("/add-application?error=" + Uri.EscapeDataString(error))
+        | None ->
+            let newApp =
+                {
+                    Id = getNextId ()
+                    Company = company
+                    Position = position
+                    DateApplied = DateTime.Now
+                    Status = status
+                    Notes = notes
+                }
+
+            applications.Add(newApp)
+            Results.Redirect("/applications-page?success=Application added successfully")
     )) |> ignore
 
-    app.MapGet("/edit/{id}", Func<int, IResult>(fun id ->
+    app.MapGet("/edit/{id}", Func<HttpContext, int, IResult>(fun ctx id ->
+        let errorMessage = ctx.Request.Query["error"].ToString()
+
         let item =
             applications |> Seq.tryFind (fun a -> a.Id = id)
 
@@ -301,8 +343,15 @@ let main args =
             let selectedInterview = if a.Status = "Interview" then "selected" else ""
             let selectedRejected = if a.Status = "Rejected" then "selected" else ""
 
+            let errorHtml =
+                if String.IsNullOrWhiteSpace(errorMessage) then
+                    ""
+                else
+                    "<div class=\"message error\">" + errorMessage + "</div>"
+
             let body =
                 "<h1>Edit Application</h1>" +
+                errorHtml +
                 "<form method=\"post\" action=\"/update/" + string a.Id + "\">" +
                 "<input name=\"company\" value=\"" + a.Company + "\" /><br/>" +
                 "<input name=\"position\" value=\"" + a.Position + "\" /><br/>" +
@@ -323,7 +372,7 @@ let main args =
 
     app.MapPost("/update/{id}", Func<int, HttpRequest, IResult>(fun id req ->
         let get name fallback =
-            if req.Form.ContainsKey(name) then req.Form[name].ToString()
+            if req.Form.ContainsKey(name) then req.Form[name].ToString().Trim()
             else fallback
 
         let existing =
@@ -331,19 +380,28 @@ let main args =
 
         match existing with
         | Some oldItem ->
-            let index = applications |> Seq.findIndex (fun a -> a.Id = id)
+            let company = get "company" oldItem.Company
+            let position = get "position" oldItem.Position
+            let status = get "status" oldItem.Status
+            let notes = get "notes" oldItem.Notes
 
-            applications.[index] <-
-                {
-                    Id = oldItem.Id
-                    Company = get "company" oldItem.Company
-                    Position = get "position" oldItem.Position
-                    DateApplied = oldItem.DateApplied
-                    Status = get "status" oldItem.Status
-                    Notes = get "notes" oldItem.Notes
-                }
+            match validateApplication company position status with
+            | Some error ->
+                Results.Redirect("/edit/" + string id + "?error=" + Uri.EscapeDataString(error))
+            | None ->
+                let index = applications |> Seq.findIndex (fun a -> a.Id = id)
 
-            Results.Redirect("/applications-page?success=Application updated successfully")
+                applications.[index] <-
+                    {
+                        Id = oldItem.Id
+                        Company = company
+                        Position = position
+                        DateApplied = oldItem.DateApplied
+                        Status = status
+                        Notes = notes
+                    }
+
+                Results.Redirect("/applications-page?success=Application updated successfully")
         | None ->
             htmlPage "Not found" "<h1>Application not found</h1><p><a href=\"/applications-page\">Back to list</a></p>"
     )) |> ignore
