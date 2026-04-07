@@ -231,7 +231,7 @@ let main args =
                 ""
 
         let applicationsContent =
-            if Seq.isEmpty sorted then
+            if Seq.isEmpty(sorted) then
                 "<div class=\"empty-message\">No applications found</div>"
             else
                 "<table>" +
@@ -244,9 +244,9 @@ let main args =
             successHtml +
             errorHtml +
             "<div class=\"stats\">" +
-            "<span style=\"color:green; font-weight:bold;\">Applied: " + string appliedCount + "</span> | " +
-            "<span style=\"color:orange; font-weight:bold;\">Interview: " + string interviewCount + "</span> | " +
-            "<span style=\"color:red; font-weight:bold;\">Rejected: " + string rejectedCount + "</span>" +
+            "<span style=\"color:green; font-weight:bold;\">Applied (" + string appliedCount + ")</span> | " +
+            "<span style=\"color:orange; font-weight:bold;\">Interview (" + string interviewCount + ")</span> | " +
+            "<span style=\"color:red; font-weight:bold;\">Rejected (" + string rejectedCount + ")</span>" +
             "</div>" +
             "<div style=\"text-align:center;margin-bottom:20px;\">" +
             "<a class=\"btn\" href=\"/add-application\">+ Add Application</a> " +
