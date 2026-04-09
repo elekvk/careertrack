@@ -26,6 +26,7 @@ let main args =
             "<title>" + title + "</title>" +
             "<style>" +
             "body { font-family: Arial; background-color: #f4f6f8; margin:0; padding:0; }" +
+            "body, input, select, textarea, button { font-family: Arial, sans-serif; }" +
             "h1 { text-align:center; }" +
             ".container { width: 80%; margin: auto; padding: 20px; }" +
             "table { width: 100%; border-collapse: collapse; background:white; box-shadow:0 2px 8px rgba(0,0,0,0.1); }" +
