@@ -2,16 +2,7 @@ open System
 open Microsoft.AspNetCore.Builder
 open Microsoft.Extensions.Hosting
 open Microsoft.AspNetCore.Http
-
-type Application =
-    {
-        Id: int
-        Company: string
-        Position: string
-        DateApplied: DateTime
-        Status: string
-        Notes: string
-    }
+open Domain
 
 [<EntryPoint>]
 let main args =
@@ -51,6 +42,25 @@ let main args =
             "text/html; charset=utf-8"
         )
 
+    let statusToString status =
+        match status with
+        | Applied -> "Applied"
+        | Interview -> "Interview"
+        | Rejected -> "Rejected"
+
+    let statusColor status =
+        match status with
+        | Applied -> "green"
+        | Interview -> "orange"
+        | Rejected -> "red"
+
+    let parseStatus value =
+        match value with
+        | "Applied" -> Some Applied
+        | "Interview" -> Some Interview
+        | "Rejected" -> Some Rejected
+        | _ -> None
+
     let applications = ResizeArray<Application>()
 
     let getNextId () =
@@ -63,7 +73,7 @@ let main args =
             |> fun maxId -> maxId + 1
 
     let isValidStatus status =
-        status = "Applied" || status = "Interview" || status = "Rejected"
+        parseStatus status |> Option.isSome
 
     let validateApplication company position status =
         if String.IsNullOrWhiteSpace(company) then
@@ -81,7 +91,7 @@ let main args =
             Company = "Microsoft"
             Position = "Backend Intern"
             DateApplied = DateTime(2026, 3, 1)
-            Status = "Applied"
+            Status = Applied
             Notes = "Applied through website"
         }
     )
@@ -92,7 +102,7 @@ let main args =
             Company = "Google"
             Position = "Software Engineer Intern"
             DateApplied = DateTime(2026, 3, 3)
-            Status = "Interview"
+            Status = Interview
             Notes = "HR round done"
         }
     )
@@ -103,7 +113,7 @@ let main args =
             Company = "SAP"
             Position = "Junior Developer"
             DateApplied = DateTime(2026, 3, 5)
-            Status = "Rejected"
+            Status = Rejected
             Notes = "Rejected email"
         }
     )
@@ -121,7 +131,7 @@ let main args =
     )) |> ignore
 
     app.MapGet("/applications-page", Func<HttpContext, IResult>(fun ctx ->
-        let search = ctx.Request.Query["search"].ToString().Trim().ToLower()
+        let search = ctx.Request.Query["search"].ToString().Trim()
         let statusFilter = ctx.Request.Query["status"].ToString()
         let successMessage = ctx.Request.Query["success"].ToString()
         let errorMessage = ctx.Request.Query["error"].ToString()
@@ -139,55 +149,41 @@ let main args =
             else
                 "<div class=\"message error\">" + errorMessage + "</div>"
 
+        let statusOption =
+            if String.IsNullOrWhiteSpace(statusFilter) then
+                None
+            else
+                parseStatus statusFilter
+
         let filtered =
             applications
-            |> Seq.filter (fun a ->
-                let matchesSearch =
-                    if String.IsNullOrWhiteSpace(search) then
-                        true
-                    else
-                        a.Company.ToLower().Contains(search)
-                        || a.Position.ToLower().Contains(search)
-                        || a.Status.ToLower().Contains(search)
-                        || a.Notes.ToLower().Contains(search)
-
-                let matchesStatus =
-                    if String.IsNullOrWhiteSpace(statusFilter) then
-                        true
-                    else
-                        a.Status = statusFilter
-
-                matchesSearch && matchesStatus
-            )
+            |> Seq.toList
+            |> filterBySearchAndStatus search statusOption
 
         let sorted =
             match sort with
-            | "company" -> filtered |> Seq.sortBy (fun a -> a.Company)
-            | _ -> filtered |> Seq.sortByDescending (fun a -> a.DateApplied)
+            | "company" -> filtered |> List.sortBy (fun a -> a.Company)
+            | _ -> filtered |> List.sortByDescending (fun a -> a.DateApplied)
 
         let appliedCount =
-            sorted |> Seq.filter (fun a -> a.Status = "Applied") |> Seq.length
+            sorted |> List.filter (fun a -> a.Status = Applied) |> List.length
 
         let interviewCount =
-            sorted |> Seq.filter (fun a -> a.Status = "Interview") |> Seq.length
+            sorted |> List.filter (fun a -> a.Status = Interview) |> List.length
 
         let rejectedCount =
-            sorted |> Seq.filter (fun a -> a.Status = "Rejected") |> Seq.length
+            sorted |> List.filter (fun a -> a.Status = Rejected) |> List.length
 
         let rows =
             sorted
-            |> Seq.map (fun a ->
-                let color =
-                    match a.Status with
-                    | "Applied" -> "green"
-                    | "Interview" -> "orange"
-                    | "Rejected" -> "red"
-                    | _ -> "black"
+            |> List.map (fun a ->
+                let color = statusColor a.Status
+                let statusText = statusToString a.Status
 
                 "<tr>" +
                 "<td>" + a.Company + "</td>" +
                 "<td>" + a.Position + "</td>" +
-                "<td><span style=\"background:" + color + ";color:white;padding:4px 8px;border-radius:5px;\">" + a.Status + "</span></td>" +
+                "<td><span style=\"background:" + color + ";color:white;padding:4px 8px;border-radius:5px;\">" + statusText + "</span></td>" +
                 "<td>" + a.DateApplied.ToString("yyyy-MM-dd") + "</td>" +
                 "<td>" + a.Notes + "</td>" +
                 "<td><a href=\"/application/" + string a.Id + "\">View</a> | <a href=\"/edit/" + string a.Id + "\">Edit</a> | <a href=\"/delete/" + string a.Id + "\" onclick=\"return confirm('Are you sure?')\">Delete</a></td>" +
@@ -232,7 +228,7 @@ let main args =
                 ""
 
         let applicationsContent =
-            if Seq.isEmpty(sorted) then
+            if List.isEmpty(sorted) then
                 "<div class=\"empty-message\">No applications found</div>"
             else
                 "<table>" +
@@ -279,18 +275,14 @@ let main args =
 
         match item with
         | Some a ->
-            let color =
-                match a.Status with
-                | "Applied" -> "green"
-                | "Interview" -> "orange"
-                | "Rejected" -> "red"
-                | _ -> "black"
+            let color = statusColor a.Status
+            let statusText = statusToString a.Status
 
             let body =
                 "<h1>Application Details</h1>" +
                 "<p><b>Company:</b> " + a.Company + "</p>" +
                 "<p><b>Position:</b> " + a.Position + "</p>" +
-                "<p><b>Status:</b> <span style=\"background:" + color + ";color:white;padding:4px 8px;border-radius:5px;\">" + a.Status + "</span></p>" +
+                "<p><b>Status:</b> <span style=\"background:" + color + ";color:white;padding:4px 8px;border-radius:5px;\">" + statusText + "</span></p>" +
                 "<p><b>Date applied:</b> " + a.DateApplied.ToString("yyyy-MM-dd") + "</p>" +
                 "<p><b>Notes:</b> " + a.Notes + "</p>" +
                 "<p><a href=\"/applications-page\">Back to list</a></p>"
@@ -342,13 +334,16 @@ let main args =
         | Some error ->
             Results.Redirect("/add-application?error=" + Uri.EscapeDataString(error))
         | None ->
+            let statusValue =
+                parseStatus status |> Option.defaultValue Applied
+
             let newApp =
                 {
                     Id = getNextId ()
                     Company = company
                     Position = position
                     DateApplied = DateTime.Now
-                    Status = status
+                    Status = statusValue
                     Notes = notes
                 }
 
@@ -364,9 +359,9 @@ let main args =
 
         match item with
         | Some a ->
-            let selectedApplied = if a.Status = "Applied" then "selected" else ""
-            let selectedInterview = if a.Status = "Interview" then "selected" else ""
-            let selectedRejected = if a.Status = "Rejected" then "selected" else ""
+            let selectedApplied = if a.Status = Applied then "selected" else ""
+            let selectedInterview = if a.Status = Interview then "selected" else ""
+            let selectedRejected = if a.Status = Rejected then "selected" else ""
 
             let errorHtml =
                 if String.IsNullOrWhiteSpace(errorMessage) then
@@ -407,13 +402,16 @@ let main args =
         | Some oldItem ->
             let company = get "company" oldItem.Company
             let position = get "position" oldItem.Position
-            let status = get "status" oldItem.Status
+            let status = get "status" (statusToString oldItem.Status)
             let notes = get "notes" oldItem.Notes
 
             match validateApplication company position status with
             | Some error ->
                 Results.Redirect("/edit/" + string id + "?error=" + Uri.EscapeDataString(error))
             | None ->
+                let statusValue =
+                    parseStatus status |> Option.defaultValue oldItem.Status
+
                 let index = applications |> Seq.findIndex (fun a -> a.Id = id)
 
                 applications.[index] <-
@@ -422,7 +420,7 @@ let main args =
                         Company = company
                         Position = position
                         DateApplied = oldItem.DateApplied
-                        Status = status
+                        Status = statusValue
                         Notes = notes
                     }
 
@@ -440,13 +438,13 @@ let main args =
         let total = applications.Count
 
         let applied =
-            applications |> Seq.filter (fun a -> a.Status = "Applied") |> Seq.length
+            applications |> Seq.filter (fun a -> a.Status = Applied) |> Seq.length
 
         let interview =
-            applications |> Seq.filter (fun a -> a.Status = "Interview") |> Seq.length
+            applications |> Seq.filter (fun a -> a.Status = Interview) |> Seq.length
 
         let rejected =
-            applications |> Seq.filter (fun a -> a.Status = "Rejected") |> Seq.length
+            applications |> Seq.filter (fun a -> a.Status = Rejected) |> Seq.length
 
         let latest =
             if applications.Count = 0 then
