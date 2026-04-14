@@ -165,14 +165,11 @@ let main args =
             | "company" -> filtered |> List.sortBy (fun a -> a.Company)
             | _ -> filtered |> List.sortByDescending (fun a -> a.DateApplied)
 
-        let appliedCount =
-            sorted |> List.filter (fun a -> a.Status = Applied) |> List.length
+        let stats = calculateStatistics sorted
 
-        let interviewCount =
-            sorted |> List.filter (fun a -> a.Status = Interview) |> List.length
-
-        let rejectedCount =
-            sorted |> List.filter (fun a -> a.Status = Rejected) |> List.length
+        let appliedCount = stats.Applied
+        let interviewCount = stats.Interview
+        let rejectedCount = stats.Rejected
 
         let rows =
             sorted
@@ -435,16 +432,15 @@ let main args =
     )) |> ignore
 
     app.MapGet("/stats", Func<IResult>(fun () ->
-        let total = applications.Count
+        let stats =
+            applications
+            |> Seq.toList
+            |> calculateStatistics
 
-        let applied =
-            applications |> Seq.filter (fun a -> a.Status = Applied) |> Seq.length
-
-        let interview =
-            applications |> Seq.filter (fun a -> a.Status = Interview) |> Seq.length
-
-        let rejected =
-            applications |> Seq.filter (fun a -> a.Status = Rejected) |> Seq.length
+        let total = stats.Total
+        let applied = stats.Applied
+        let interview = stats.Interview
+        let rejected = stats.Rejected
 
         let latest =
             if applications.Count = 0 then

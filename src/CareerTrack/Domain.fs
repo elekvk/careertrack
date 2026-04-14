@@ -72,3 +72,43 @@ let filterBySearchAndStatus (search: string) (status: ApplicationStatus option) 
     apps
     |> List.filter (matchesSearch search)
     |> List.filter (matchesStatus status)
+
+type Statistics =
+    {
+        Total: int
+        Applied: int
+        Interview: int
+        Rejected: int
+    }
+
+let emptyStatistics =
+    {
+        Total = 0
+        Applied = 0
+        Interview = 0
+        Rejected = 0
+    }
+
+let calculateStatistics (apps: Application list) =
+    apps
+    |> List.fold (fun acc app ->
+        match app.Status with
+        | Applied ->
+            {
+                acc with
+                    Total = acc.Total + 1
+                    Applied = acc.Applied + 1
+            }
+        | Interview ->
+            {
+                acc with
+                    Total = acc.Total + 1
+                    Interview = acc.Interview + 1
+            }
+        | Rejected ->
+            {
+                acc with
+                    Total = acc.Total + 1
+                    Rejected = acc.Rejected + 1
+            }
+    ) emptyStatistics
