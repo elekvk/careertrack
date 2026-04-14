@@ -1,5 +1,7 @@
 ﻿module Domain
 
+open System
+
 type ApplicationStatus =
     | Applied
     | Interview
@@ -112,3 +114,19 @@ let calculateStatistics (apps: Application list) =
                     Rejected = acc.Rejected + 1
             }
     ) emptyStatistics
+let parseStatus (status: string) =
+    match status with
+    | "Applied" -> Some Applied
+    | "Interview" -> Some Interview
+    | "Rejected" -> Some Rejected
+    | _ -> None
+
+let validateApplication company position status =
+    if String.IsNullOrWhiteSpace(company) then
+        Some "Company is required."
+    elif String.IsNullOrWhiteSpace(position) then
+        Some "Position is required."
+    elif Option.isNone (parseStatus status) then
+        Some "Invalid status selected."
+    else
+        None

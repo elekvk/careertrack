@@ -72,19 +72,6 @@ let main args =
             |> Seq.max
             |> fun maxId -> maxId + 1
 
-    let isValidStatus status =
-        parseStatus status |> Option.isSome
-
-    let validateApplication company position status =
-        if String.IsNullOrWhiteSpace(company) then
-            Some "Company is required."
-        elif String.IsNullOrWhiteSpace(position) then
-            Some "Position is required."
-        elif not (isValidStatus status) then
-            Some "Invalid status selected."
-        else
-            None
-
     applications.Add(
         {
             Id = 1
