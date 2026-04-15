@@ -1,51 +1,68 @@
-# CareerTrack
+# CareerTrack 🚀
 
-CareerTrack is a job and internship application tracking web application built with F#.
-
-## Features
-
-- Add new job applications
-- View applications in a table
-- Edit and delete applications
-- Search applications by company, position, and notes
-- Filter by status (Applied, Interview, Rejected)
-- Sort applications by date or company
-- View application statistics
-
-## Technologies
-
-- F#
-- ASP.NET Core Minimal API
-- HTML & CSS
-
-## How to Run
-
-1. Open the project in Visual Studio
-2. Build and run the application
-3. Open in browser:
-   `https://localhost:5001/applications-page`
-
-## Project Structure
-
-- `Program.fs` - ASP.NET Core routes and page rendering
-- `Domain.fs` - domain model, validation, filtering, and statistics logic
-- In-memory storage (no database)
-
-## Purpose
-
-This project demonstrates CRUD operations, domain modeling, filtering, validation, and statistics calculation in an F# web application.
-
-## Screenshots
-
-### Applications Page
-![Applications](screenshots/applications.png)
-
-### Add Application
-![Add](screenshots/add.png)
-
-### Statistics
-![Stats](screenshots/stats.png)
+A web application for tracking job and internship applications, built with F# and ASP.NET Core.
 
 ## Live Demo
 
-Live demo link will be added after deployment.
+https://careertrack-e5rg.onrender.com
+
+---
+
+## Features
+
+* Add new job applications
+* View applications in a structured table
+* Edit and delete entries
+* Filter by status (Applied, Interview, Rejected)
+* Search by company or position
+* Statistics dashboard
+
+---
+
+## Tech Stack
+
+* F#
+* ASP.NET Core
+* .NET 9
+* HTML & CSS
+* Docker
+* Render (deployment)
+
+---
+
+## Screenshots
+
+![Home](screenshots/home.png)
+![Add](screenshots/add.png)
+![Stats](screenshots/stats.png)
+
+---
+
+## Getting Started (Local)
+
+```bash
+git clone https://github.com/elekvk/careertrack.git
+cd careertrack
+dotnet run
+```
+
+---
+
+## Run with Docker
+
+```bash
+docker build -t careertrack .
+docker run -p 10000:10000 careertrack
+```
+
+---
+
+## Deployment
+
+This project is deployed using Render with Docker.
+
+---
+
+## Author
+
+* GitHub: https://github.com/elekvk
