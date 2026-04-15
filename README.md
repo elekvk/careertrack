@@ -1,4 +1,4 @@
-# CareerTrack 🚀
+# CareerTrack
 
 A web application for tracking job and internship applications, built with F# and ASP.NET Core.
 
@@ -32,7 +32,7 @@ https://careertrack-e5rg.onrender.com
 
 ## Screenshots
 
-![Home](screenshots/home.png)
+![Applications](screenshots/applications.png)
 ![Add](screenshots/add.png)
 ![Stats](screenshots/stats.png)
 
