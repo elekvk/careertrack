@@ -7,8 +7,9 @@ CareerTrack is a job and internship application tracking web application built w
 - Add new job applications
 - View applications in a table
 - Edit and delete applications
-- Search applications
+- Search applications by company, position, and notes
 - Filter by status (Applied, Interview, Rejected)
+- Sort applications by date or company
 - View application statistics
 
 ## Technologies
@@ -22,16 +23,17 @@ CareerTrack is a job and internship application tracking web application built w
 1. Open the project in Visual Studio
 2. Build and run the application
 3. Open in browser:
-   https://localhost:5001/applications-page
+   `https://localhost:5001/applications-page`
 
 ## Project Structure
 
-- Program.fs - main application logic
+- `Program.fs` - ASP.NET Core routes and page rendering
+- `Domain.fs` - domain model, validation, filtering, and statistics logic
 - In-memory storage (no database)
 
 ## Purpose
 
-This project demonstrates CRUD operations, filtering, and basic web application development using F#.
+This project demonstrates CRUD operations, domain modeling, filtering, validation, and statistics calculation in an F# web application.
 
 ## Screenshots
 
@@ -46,4 +48,4 @@ This project demonstrates CRUD operations, filtering, and basic web application 
 
 ## Live Demo
 
-Currently not deployed yet.
+Live demo link will be added after deployment.
