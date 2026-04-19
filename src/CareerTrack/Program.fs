@@ -429,6 +429,10 @@ let main args =
         let interview = stats.Interview
         let rejected = stats.Rejected
 
+        let appliedPercent = percentage applied total
+        let interviewPercent = percentage interview total
+        let rejectedPercent = percentage rejected total
+
         let latest =
             if applications.Count = 0 then
                 "N/A"
@@ -440,17 +444,32 @@ let main args =
         let body =
             "<h1>Statistics</h1>" +
             "<div class=\"stats\">" +
+
             "<p><b>Total applications:</b> " + string total + "</p>" +
-            "<p><b>Applied:</b> " + string applied + "</p>" +
-            "<p><b>Interview:</b> " + string interview + "</p>" +
-            "<p><b>Rejected:</b> " + string rejected + "</p>" +
+
+            "<p><b>Applied:</b> " + string applied + " (" + appliedPercent.ToString("0.0") + "%)</p>" +
+            "<div style=\"width:300px;margin:0 auto 15px auto;background:#ddd;border-radius:8px;overflow:hidden;\">" +
+            "<div style=\"width:" + appliedPercent.ToString("0.0", Globalization.CultureInfo.InvariantCulture) + "%;background:green;padding:8px 0;\"></div>" +
+            "</div>" +
+
+            "<p><b>Interview:</b> " + string interview + " (" + interviewPercent.ToString("0.0") + "%)</p>" +
+            "<div style=\"width:300px;margin:0 auto 15px auto;background:#ddd;border-radius:8px;overflow:hidden;\">" +
+            "<div style=\"width:" + interviewPercent.ToString("0.0", Globalization.CultureInfo.InvariantCulture) + "%;background:orange;padding:8px 0;\"></div>" +
+            "</div>" +
+
+            "<p><b>Rejected:</b> " + string rejected + " (" + rejectedPercent.ToString("0.0") + "%)</p>" +
+            "<div style=\"width:300px;margin:0 auto 15px auto;background:#ddd;border-radius:8px;overflow:hidden;\">" +
+            "<div style=\"width:" + rejectedPercent.ToString("0.0", Globalization.CultureInfo.InvariantCulture) + "%;background:red;padding:8px 0;\"></div>" +
+            "</div>" +
+
             "<p><b>Latest application:</b> " + latest + "</p>" +
             "</div>" +
+
             "<p style=\"text-align:center;\">" +
             "<a class=\"btn\" href=\"/applications-page\">Back to applications</a>" +
             "</p>"
 
-        htmlPage "Statistics" body
+                htmlPage "Statistics" body
     )) |> ignore
 
     app.Run()

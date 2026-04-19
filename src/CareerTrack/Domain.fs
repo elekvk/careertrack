@@ -130,3 +130,8 @@ let validateApplication company position status =
         Some "Invalid status selected."
     else
         None
+let percentage part total =
+    if total = 0 then
+        0.0
+    else
+        (float part / float total) * 100.0
