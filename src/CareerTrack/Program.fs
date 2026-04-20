@@ -34,6 +34,8 @@ let main args =
             ".success { color:green; background:#eafaf1; }" +
             ".error { color:#b00020; background:#fdecea; }" +
             ".empty-message { text-align:center; background:white; padding:20px; border-radius:8px; box-shadow:0 2px 8px rgba(0,0,0,0.1); font-weight:bold; color:#555; }" +
+            ".highlight-box { background:#e8f5e9; padding:15px; border-radius:10px; margin-bottom:20px; text-align:center; box-shadow:0 2px 8px rgba(0,0,0,0.08); }" +
+            ".progress-bar { height:20px; border-radius:8px; transition: width 0.8s ease-in-out; }" +
             "</style>" +
             "</head>" +
             "<body><div class=\"container\">" +
@@ -152,6 +154,23 @@ let main args =
             | "company" -> filtered |> List.sortBy (fun a -> a.Company)
             | _ -> filtered |> List.sortByDescending (fun a -> a.DateApplied)
 
+        let latestApplication =
+            if List.isEmpty(sorted) then
+                None
+            else
+                Some (sorted |> List.maxBy (fun a -> a.DateApplied))
+
+        let latestHtml =
+            match latestApplication with
+            | Some a ->
+                "<div class=\"highlight-box\">" +
+                "<b>Latest application:</b> " + a.Company + " - " + a.Position +
+                " <span style=\"background:" + statusColor a.Status + ";color:white;padding:4px 8px;border-radius:5px;margin-left:8px;\">" +
+                statusToString a.Status +
+                "</span></div>"
+            | None ->
+                ""
+
         let stats = calculateStatistics sorted
 
         let appliedCount = stats.Applied
@@ -221,6 +240,7 @@ let main args =
                 "</table>"
 
         let body =
+            latestHtml +
             "<h1>Job Applications</h1>" +
             successHtml +
             errorHtml +
@@ -451,17 +471,17 @@ let main args =
 
             "<p><b>Applied:</b> " + string applied + " (" + appliedPercent.ToString("0.0") + "%)</p>" +
             "<div style=\"width:300px;margin:0 auto 15px auto;background:#ddd;border-radius:8px;overflow:hidden;\">" +
-            "<div style=\"width:" + appliedPercent.ToString("0.0", Globalization.CultureInfo.InvariantCulture) + "%;background:green;padding:8px 0;\"></div>" +
+            "<div class=\"progress-bar\" style=\"width:" + appliedPercent.ToString("0.0", Globalization.CultureInfo.InvariantCulture) + "%;background:green;\"></div>" +
             "</div>" +
 
             "<p><b>Interview:</b> " + string interview + " (" + interviewPercent.ToString("0.0") + "%)</p>" +
             "<div style=\"width:300px;margin:0 auto 15px auto;background:#ddd;border-radius:8px;overflow:hidden;\">" +
-            "<div style=\"width:" + interviewPercent.ToString("0.0", Globalization.CultureInfo.InvariantCulture) + "%;background:orange;padding:8px 0;\"></div>" +
+            "<div class=\"progress-bar\" style=\"width:" + interviewPercent.ToString("0.0", Globalization.CultureInfo.InvariantCulture) + "%;background:orange;\"></div>" +
             "</div>" +
 
             "<p><b>Rejected:</b> " + string rejected + " (" + rejectedPercent.ToString("0.0") + "%)</p>" +
             "<div style=\"width:300px;margin:0 auto 15px auto;background:#ddd;border-radius:8px;overflow:hidden;\">" +
-            "<div style=\"width:" + rejectedPercent.ToString("0.0", Globalization.CultureInfo.InvariantCulture) + "%;background:red;padding:8px 0;\"></div>" +
+            "<div class=\"progress-bar\" style=\"width:" + rejectedPercent.ToString("0.0", Globalization.CultureInfo.InvariantCulture) + "%;background:red;\"></div>" +
             "</div>" +
 
             "<p><b>Latest application:</b> " + latest + "</p>" +
