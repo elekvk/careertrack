@@ -19,6 +19,7 @@ let main args =
             "body { font-family: Arial; background-color: #f4f6f8; margin:0; padding:0; }" +
             "body, input, select, textarea, button { font-family: Arial, sans-serif; }" +
             "h1 { text-align:center; }" +
+            "h2 { text-align:center; color:#2c3e50; }" +
             ".container { width: 80%; margin: auto; padding: 20px; }" +
             "table { width: 100%; border-collapse: collapse; background:white; box-shadow:0 2px 8px rgba(0,0,0,0.1); }" +
             "th, td { padding: 10px; border-bottom: 1px solid #ddd; text-align:left; }" +
@@ -62,6 +63,12 @@ let main args =
         | "Interview" -> Some Interview
         | "Rejected" -> Some Rejected
         | _ -> None
+
+    let cardHtml title value color =
+        "<div style=\"display:inline-block;width:180px;margin:10px;padding:20px;background:white;border-radius:12px;box-shadow:0 2px 8px rgba(0,0,0,0.08);text-align:center;vertical-align:top;\">" +
+        "<div style=\"font-size:14px;color:#666;margin-bottom:8px;\">" + title + "</div>" +
+        "<div style=\"font-size:28px;font-weight:bold;color:" + color + ";\">" + value + "</div>" +
+        "</div>"
 
     let applications = ResizeArray<Application>()
 
@@ -110,7 +117,10 @@ let main args =
     app.MapGet("/", Func<IResult>(fun () ->
         let body =
             "<h1>CareerTrack</h1>" +
-            "<p style=\"text-align:center;\"><a href=\"/applications-page\">Go to applications</a></p>"
+            "<p style=\"text-align:center; font-size:18px; color:#555;\">Track your job applications in one place</p>" +
+            "<div style=\"text-align:center; margin-top:30px;\">" +
+            "<a class=\"btn\" href=\"/applications-page\">Go to applications</a>" +
+            "</div>"
 
         htmlPage "Home" body
     )) |> ignore
@@ -173,9 +183,37 @@ let main args =
 
         let stats = calculateStatistics sorted
 
+        let totalCount = stats.Total
         let appliedCount = stats.Applied
         let interviewCount = stats.Interview
         let rejectedCount = stats.Rejected
+
+        let rejectionRate =
+            if totalCount = 0 then
+                "0.0%"
+            else
+                ((float rejectedCount / float totalCount) * 100.0).ToString("0.0") + "%"
+
+        let recentApplications =
+            sorted
+            |> List.sortByDescending (fun a -> a.DateApplied)
+            |> List.truncate 3
+
+        let recentHtml =
+            if List.isEmpty(recentApplications) then
+                ""
+            else
+                let items =
+                    recentApplications
+                    |> List.map (fun a ->
+                        "<div style=\"background:white;padding:12px 16px;margin-bottom:10px;border-radius:10px;box-shadow:0 2px 8px rgba(0,0,0,0.06);\">" +
+                        "<b>" + a.Company + "</b> - " + a.Position +
+                        "<div style=\"font-size:13px;color:#666;margin-top:4px;\">Applied on " + a.DateApplied.ToString("yyyy-MM-dd") + "</div>" +
+                        "</div>"
+                    )
+                    |> String.concat ""
+
+                "<h2 style=\"margin-top:30px;\">Recent Applications</h2>" + items
 
         let rows =
             sorted
@@ -244,10 +282,14 @@ let main args =
             "<h1>Job Applications</h1>" +
             successHtml +
             errorHtml +
-            "<div class=\"stats\">" +
-            "<span style=\"color:green; font-weight:bold;\">Applied (" + string appliedCount + ")</span> | " +
-            "<span style=\"color:orange; font-weight:bold;\">Interview (" + string interviewCount + ")</span> | " +
-            "<span style=\"color:red; font-weight:bold;\">Rejected (" + string rejectedCount + ")</span>" +
+            "<div style=\"text-align:center;margin-bottom:25px;\">" +
+            cardHtml "Total" (string totalCount) "#2c3e50" +
+            cardHtml "Applied" (string appliedCount) "green" +
+            cardHtml "Interview" (string interviewCount) "orange" +
+            cardHtml "Rejected" (string rejectedCount) "red" +
+            "</div>" +
+            "<div style=\"text-align:center;margin-bottom:20px;\">" +
+            "<div style=\"display:inline-block;background:white;padding:12px 18px;border-radius:10px;box-shadow:0 2px 8px rgba(0,0,0,0.06);margin:6px;\"><b>Rejection rate:</b> " + rejectionRate + "</div>" +
             "</div>" +
             "<div style=\"text-align:center;margin-bottom:20px;\">" +
             "<a class=\"btn\" href=\"/add-application\">+ Add Application</a> " +
@@ -268,7 +310,8 @@ let main args =
             "<button class=\"btn\" type=\"submit\">Filter</button> " +
             "<a class=\"btn\" href=\"/applications-page\">Clear</a>" +
             "</form>" +
-            applicationsContent
+            applicationsContent +
+            recentHtml
 
         htmlPage "Applications" body
     )) |> ignore
