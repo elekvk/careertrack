@@ -437,9 +437,11 @@ let main args =
             if applications.Count = 0 then
                 "N/A"
             else
-                applications
-                |> Seq.maxBy (fun a -> a.DateApplied)
-                |> fun a -> a.DateApplied.ToString("yyyy-MM-dd")
+                let latestApp =
+                    applications
+                    |> Seq.maxBy (fun a -> a.DateApplied)
+
+                latestApp.DateApplied.ToString("yyyy-MM-dd")
 
         let body =
             "<h1>Statistics</h1>" +
@@ -469,7 +471,7 @@ let main args =
             "<a class=\"btn\" href=\"/applications-page\">Back to applications</a>" +
             "</p>"
 
-                htmlPage "Statistics" body
+        htmlPage "Statistics" body
     )) |> ignore
 
     app.Run()
