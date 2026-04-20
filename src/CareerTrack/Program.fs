@@ -463,6 +463,15 @@ let main args =
 
                 latestApp.DateApplied.ToString("yyyy-MM-dd")
 
+        let mostCommonStatus =
+            if applications.Count = 0 then
+                "N/A"
+            else
+                applications
+                |> Seq.groupBy (fun a -> a.Status)
+                |> Seq.maxBy (fun (_, apps) -> Seq.length apps)
+                |> fun (status, _) -> statusToString status
+
         let body =
             "<h1>Statistics</h1>" +
             "<div class=\"stats\">" +
@@ -485,6 +494,7 @@ let main args =
             "</div>" +
 
             "<p><b>Latest application:</b> " + latest + "</p>" +
+            "<p><b>Most common status:</b> " + mostCommonStatus + "</p>" +
             "</div>" +
 
             "<p style=\"text-align:center;\">" +

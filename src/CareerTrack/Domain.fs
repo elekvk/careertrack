@@ -12,7 +12,7 @@ type Application =
         Id: int
         Company: string
         Position: string
-        DateApplied: System.DateTime
+        DateApplied: DateTime
         Status: ApplicationStatus
         Notes: string
     }
@@ -31,7 +31,7 @@ let initialState =
                     Id = 1
                     Company = "Microsoft"
                     Position = "Backend Intern"
-                    DateApplied = System.DateTime(2026, 3, 1)
+                    DateApplied = DateTime(2026, 3, 1)
                     Status = Applied
                     Notes = "Applied through website"
                 }
@@ -39,7 +39,7 @@ let initialState =
                     Id = 2
                     Company = "Google"
                     Position = "Software Engineer Intern"
-                    DateApplied = System.DateTime(2026, 3, 3)
+                    DateApplied = DateTime(2026, 3, 3)
                     Status = Interview
                     Notes = "HR round done"
                 }
@@ -47,7 +47,7 @@ let initialState =
                     Id = 3
                     Company = "SAP"
                     Position = "Junior Developer"
-                    DateApplied = System.DateTime(2026, 3, 5)
+                    DateApplied = DateTime(2026, 3, 5)
                     Status = Rejected
                     Notes = "Rejected email"
                 }
@@ -114,6 +114,7 @@ let calculateStatistics (apps: Application list) =
                     Rejected = acc.Rejected + 1
             }
     ) emptyStatistics
+
 let parseStatus (status: string) =
     match status with
     | "Applied" -> Some Applied
@@ -130,6 +131,7 @@ let validateApplication company position status =
         Some "Invalid status selected."
     else
         None
+
 let percentage part total =
     if total = 0 then
         0.0
