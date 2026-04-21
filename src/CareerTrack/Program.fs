@@ -1,4 +1,4 @@
-open System
+﻿open System
 open Microsoft.AspNetCore.Builder
 open Microsoft.Extensions.Hosting
 open Microsoft.AspNetCore.Http
@@ -18,18 +18,19 @@ let main args =
             "<style>" +
             "body { font-family: Arial; background-color: #f4f6f8; margin:0; padding:0; }" +
             "body, input, select, textarea, button { font-family: Arial, sans-serif; }" +
-            "h1 { text-align:center; }" +
-            "h2 { text-align:center; color:#2c3e50; }" +
+            "h1 { text-align:center; color:#2c3e50; }" +
+            "h2 { color:#2c3e50; }" +
             ".container { width: 80%; margin: auto; padding: 20px; }" +
             "table { width: 100%; border-collapse: collapse; background:white; box-shadow:0 2px 8px rgba(0,0,0,0.1); }" +
-            "th, td { padding: 10px; border-bottom: 1px solid #ddd; text-align:left; }" +
+            "th, td { padding: 10px; border-bottom: 1px solid #ddd; text-align:left; vertical-align:top; }" +
             "th { background-color: #2c3e50; color:white; }" +
             "tr:hover { background-color: #f1f1f1; }" +
             "a { text-decoration:none; color:#3498db; font-weight:bold; }" +
             "a:hover { text-decoration:underline; }" +
-            ".btn { display:inline-block; padding:10px 15px; background:#3498db; color:white; border-radius:5px; border:none; cursor:pointer; }" +
+            ".btn { display:inline-block; padding:10px 15px; background:#3498db; color:white; border-radius:5px; border:none; cursor:pointer; margin:2px; }" +
             ".btn:hover { background:#2980b9; }" +
             "input, select, textarea { padding:8px; width:300px; margin-bottom:10px; }" +
+            "textarea { min-height:100px; }" +
             ".stats { text-align:center; margin-bottom:20px; font-size:18px; }" +
             ".message { text-align:center; font-weight:bold; padding:10px; border-radius:6px; margin-bottom:20px; }" +
             ".success { color:green; background:#eafaf1; }" +
@@ -37,6 +38,12 @@ let main args =
             ".empty-message { text-align:center; background:white; padding:20px; border-radius:8px; box-shadow:0 2px 8px rgba(0,0,0,0.1); font-weight:bold; color:#555; }" +
             ".highlight-box { background:#e8f5e9; padding:15px; border-radius:10px; margin-bottom:20px; text-align:center; box-shadow:0 2px 8px rgba(0,0,0,0.08); }" +
             ".progress-bar { height:20px; border-radius:8px; transition: width 0.8s ease-in-out; }" +
+            ".card { display:inline-block; width:180px; margin:10px; padding:20px; background:white; border-radius:12px; box-shadow:0 2px 8px rgba(0,0,0,0.08); text-align:center; vertical-align:top; }" +
+            ".card-title { font-size:14px; color:#666; margin-bottom:8px; }" +
+            ".card-value { font-size:28px; font-weight:bold; }" +
+            ".favorites-box { background:#fff8e1; padding:16px; border-radius:10px; margin-top:20px; box-shadow:0 2px 8px rgba(0,0,0,0.06); }" +
+            ".recent-item { background:white; padding:12px 16px; margin-bottom:10px; border-radius:10px; box-shadow:0 2px 8px rgba(0,0,0,0.06); }" +
+            ".subtitle { text-align:center; font-size:18px; color:#555; margin-top:-8px; margin-bottom:24px; }" +
             "</style>" +
             "</head>" +
             "<body><div class=\"container\">" +
@@ -57,17 +64,10 @@ let main args =
         | Interview -> "orange"
         | Rejected -> "red"
 
-    let parseStatus value =
-        match value with
-        | "Applied" -> Some Applied
-        | "Interview" -> Some Interview
-        | "Rejected" -> Some Rejected
-        | _ -> None
-
     let cardHtml title value color =
-        "<div style=\"display:inline-block;width:180px;margin:10px;padding:20px;background:white;border-radius:12px;box-shadow:0 2px 8px rgba(0,0,0,0.08);text-align:center;vertical-align:top;\">" +
-        "<div style=\"font-size:14px;color:#666;margin-bottom:8px;\">" + title + "</div>" +
-        "<div style=\"font-size:28px;font-weight:bold;color:" + color + ";\">" + value + "</div>" +
+        "<div class=\"card\">" +
+        "<div class=\"card-title\">" + title + "</div>" +
+        "<div class=\"card-value\" style=\"color:" + color + ";\">" + value + "</div>" +
         "</div>"
 
     let applications = ResizeArray<Application>()
@@ -89,6 +89,7 @@ let main args =
             DateApplied = DateTime(2026, 3, 1)
             Status = Applied
             Notes = "Applied through website"
+            IsFavorite = false
         }
     )
 
@@ -100,6 +101,7 @@ let main args =
             DateApplied = DateTime(2026, 3, 3)
             Status = Interview
             Notes = "HR round done"
+            IsFavorite = true
         }
     )
 
@@ -111,15 +113,17 @@ let main args =
             DateApplied = DateTime(2026, 3, 5)
             Status = Rejected
             Notes = "Rejected email"
+            IsFavorite = false
         }
     )
 
     app.MapGet("/", Func<IResult>(fun () ->
         let body =
             "<h1>CareerTrack</h1>" +
-            "<p style=\"text-align:center; font-size:18px; color:#555;\">Track your job applications in one place</p>" +
-            "<div style=\"text-align:center; margin-top:30px;\">" +
+            "<div class=\"subtitle\">Track your job and internship applications in one place</div>" +
+            "<div style=\"text-align:center; margin-top:20px;\">" +
             "<a class=\"btn\" href=\"/applications-page\">Go to applications</a>" +
+            "<a class=\"btn\" href=\"/stats\">View statistics</a>" +
             "</div>"
 
         htmlPage "Home" body
@@ -127,6 +131,18 @@ let main args =
 
     app.MapGet("/applications", Func<Application list>(fun () ->
         applications |> Seq.toList
+    )) |> ignore
+
+    app.MapGet("/favorite/{id}", Func<int, IResult>(fun id ->
+        let existing = applications |> Seq.tryFind (fun a -> a.Id = id)
+
+        match existing with
+        | Some item ->
+            let index = applications |> Seq.findIndex (fun a -> a.Id = id)
+            applications.[index] <- { item with IsFavorite = not item.IsFavorite }
+            Results.Redirect("/applications-page?success=Favorite updated successfully")
+        | None ->
+            Results.Redirect("/applications-page?error=Application not found")
     )) |> ignore
 
     app.MapGet("/applications-page", Func<HttpContext, IResult>(fun ctx ->
@@ -194,6 +210,28 @@ let main args =
             else
                 ((float rejectedCount / float totalCount) * 100.0).ToString("0.0") + "%"
 
+        let favoriteApplications =
+            sorted |> List.filter (fun a -> a.IsFavorite)
+
+        let favoritesHtml =
+            if List.isEmpty(favoriteApplications) then
+                ""
+            else
+                let items =
+                    favoriteApplications
+                    |> List.map (fun a ->
+                        "<div style=\"padding:10px 0;border-bottom:1px solid #eee;\">" +
+                        "⭐ <b>" + a.Company + "</b> - " + a.Position +
+                        " <span style=\"color:#666;\">(" + statusToString a.Status + ")</span>" +
+                        "</div>"
+                    )
+                    |> String.concat ""
+
+                "<div class=\"favorites-box\">" +
+                "<h2>Favorite Applications</h2>" +
+                items +
+                "</div>"
+
         let recentApplications =
             sorted
             |> List.sortByDescending (fun a -> a.DateApplied)
@@ -206,7 +244,7 @@ let main args =
                 let items =
                     recentApplications
                     |> List.map (fun a ->
-                        "<div style=\"background:white;padding:12px 16px;margin-bottom:10px;border-radius:10px;box-shadow:0 2px 8px rgba(0,0,0,0.06);\">" +
+                        "<div class=\"recent-item\">" +
                         "<b>" + a.Company + "</b> - " + a.Position +
                         "<div style=\"font-size:13px;color:#666;margin-top:4px;\">Applied on " + a.DateApplied.ToString("yyyy-MM-dd") + "</div>" +
                         "</div>"
@@ -220,14 +258,26 @@ let main args =
             |> List.map (fun a ->
                 let color = statusColor a.Status
                 let statusText = statusToString a.Status
+                let favoritePrefix =
+                    if a.IsFavorite then "⭐ "
+                    else ""
+
+                let favoriteActionText =
+                    if a.IsFavorite then "Unfavorite"
+                    else "Favorite"
 
                 "<tr>" +
-                "<td>" + a.Company + "</td>" +
+                "<td>" + favoritePrefix + a.Company + "</td>" +
                 "<td>" + a.Position + "</td>" +
                 "<td><span style=\"background:" + color + ";color:white;padding:4px 8px;border-radius:5px;\">" + statusText + "</span></td>" +
                 "<td>" + a.DateApplied.ToString("yyyy-MM-dd") + "</td>" +
                 "<td>" + a.Notes + "</td>" +
-                "<td><a href=\"/application/" + string a.Id + "\">View</a> | <a href=\"/edit/" + string a.Id + "\">Edit</a> | <a href=\"/delete/" + string a.Id + "\" onclick=\"return confirm('Are you sure?')\">Delete</a></td>" +
+                "<td>" +
+                "<a href=\"/application/" + string a.Id + "\">View</a> | " +
+                "<a href=\"/edit/" + string a.Id + "\">Edit</a> | " +
+                "<a href=\"/delete/" + string a.Id + "\" onclick=\"return confirm('Are you sure?')\">Delete</a> | " +
+                "<a href=\"/favorite/" + string a.Id + "\">" + favoriteActionText + "</a>" +
+                "</td>" +
                 "</tr>"
             )
             |> String.concat ""
@@ -311,6 +361,7 @@ let main args =
             "<a class=\"btn\" href=\"/applications-page\">Clear</a>" +
             "</form>" +
             applicationsContent +
+            favoritesHtml +
             recentHtml
 
         htmlPage "Applications" body
@@ -324,6 +375,9 @@ let main args =
         | Some a ->
             let color = statusColor a.Status
             let statusText = statusToString a.Status
+            let favoriteText =
+                if a.IsFavorite then "Yes"
+                else "No"
 
             let body =
                 "<h1>Application Details</h1>" +
@@ -332,6 +386,7 @@ let main args =
                 "<p><b>Status:</b> <span style=\"background:" + color + ";color:white;padding:4px 8px;border-radius:5px;\">" + statusText + "</span></p>" +
                 "<p><b>Date applied:</b> " + a.DateApplied.ToString("yyyy-MM-dd") + "</p>" +
                 "<p><b>Notes:</b> " + a.Notes + "</p>" +
+                "<p><b>Favorite:</b> " + favoriteText + "</p>" +
                 "<p><a href=\"/applications-page\">Back to list</a></p>"
 
             htmlPage "Details" body
@@ -392,6 +447,7 @@ let main args =
                     DateApplied = DateTime.Now
                     Status = statusValue
                     Notes = notes
+                    IsFavorite = false
                 }
 
             applications.Add(newApp)
@@ -469,6 +525,7 @@ let main args =
                         DateApplied = oldItem.DateApplied
                         Status = statusValue
                         Notes = notes
+                        IsFavorite = oldItem.IsFavorite
                     }
 
                 Results.Redirect("/applications-page?success=Application updated successfully")
@@ -515,6 +572,11 @@ let main args =
                 |> Seq.maxBy (fun (_, apps) -> Seq.length apps)
                 |> fun (status, _) -> statusToString status
 
+        let favoriteCount =
+            applications
+            |> Seq.filter (fun a -> a.IsFavorite)
+            |> Seq.length
+
         let body =
             "<h1>Statistics</h1>" +
             "<div class=\"stats\">" +
@@ -538,6 +600,7 @@ let main args =
 
             "<p><b>Latest application:</b> " + latest + "</p>" +
             "<p><b>Most common status:</b> " + mostCommonStatus + "</p>" +
+            "<p><b>Favorite applications:</b> " + string favoriteCount + "</p>" +
             "</div>" +
 
             "<p style=\"text-align:center;\">" +

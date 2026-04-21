@@ -15,6 +15,7 @@ type Application =
         DateApplied: DateTime
         Status: ApplicationStatus
         Notes: string
+        IsFavorite: bool
     }
 
 type State =
@@ -34,6 +35,7 @@ let initialState =
                     DateApplied = DateTime(2026, 3, 1)
                     Status = Applied
                     Notes = "Applied through website"
+                    IsFavorite = false
                 }
                 {
                     Id = 2
@@ -42,6 +44,7 @@ let initialState =
                     DateApplied = DateTime(2026, 3, 3)
                     Status = Interview
                     Notes = "HR round done"
+                    IsFavorite = true
                 }
                 {
                     Id = 3
@@ -50,6 +53,7 @@ let initialState =
                     DateApplied = DateTime(2026, 3, 5)
                     Status = Rejected
                     Notes = "Rejected email"
+                    IsFavorite = false
                 }
             ]
         SearchText = ""
