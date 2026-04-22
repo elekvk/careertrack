@@ -14,36 +14,45 @@ let main args =
             "<html>" +
             "<head>" +
             "<meta charset=\"UTF-8\">" +
+            "<meta name=\"viewport\" content=\"width=device-width, initial-scale=1.0\">" +
             "<title>" + title + "</title>" +
             "<style>" +
-            "body { font-family: Arial; background-color: #f4f6f8; margin:0; padding:0; }" +
+            "body { font-family: Arial; background-color: #f4f6f8; margin:0; padding:0; color:#2c3e50; }" +
             "body, input, select, textarea, button { font-family: Arial, sans-serif; }" +
-            "h1 { text-align:center; color:#2c3e50; }" +
+            "h1 { text-align:center; color:#2c3e50; margin-bottom:8px; }" +
             "h2 { color:#2c3e50; }" +
-            ".container { width: 80%; margin: auto; padding: 20px; }" +
-            "table { width: 100%; border-collapse: collapse; background:white; box-shadow:0 2px 8px rgba(0,0,0,0.1); }" +
-            "th, td { padding: 10px; border-bottom: 1px solid #ddd; text-align:left; vertical-align:top; }" +
+            ".container { width: 85%; max-width: 1200px; margin: auto; padding: 24px; }" +
+            "table { width: 100%; border-collapse: collapse; background:white; box-shadow:0 2px 8px rgba(0,0,0,0.1); border-radius:12px; overflow:hidden; }" +
+            "th, td { padding: 12px; border-bottom: 1px solid #eee; text-align:left; vertical-align:top; }" +
             "th { background-color: #2c3e50; color:white; }" +
-            "tr:hover { background-color: #f1f1f1; }" +
+            "tr:hover { background-color: #f9fbfc; }" +
             "a { text-decoration:none; color:#3498db; font-weight:bold; }" +
             "a:hover { text-decoration:underline; }" +
-            ".btn { display:inline-block; padding:10px 15px; background:#3498db; color:white; border-radius:5px; border:none; cursor:pointer; margin:2px; }" +
-            ".btn:hover { background:#2980b9; }" +
-            "input, select, textarea { padding:8px; width:300px; margin-bottom:10px; }" +
-            "textarea { min-height:100px; }" +
+            ".btn { display:inline-block; padding:10px 15px; background:#3498db; color:white; border-radius:8px; border:none; cursor:pointer; margin:4px; font-weight:bold; }" +
+            ".btn:hover { background:#2980b9; text-decoration:none; }" +
+            ".btn-secondary { background:#7f8c8d; }" +
+            ".btn-secondary:hover { background:#6c7a7a; }" +
+            "input, select, textarea { padding:10px; width:320px; max-width:100%; margin-bottom:10px; border:1px solid #dcdfe3; border-radius:8px; box-sizing:border-box; }" +
+            "textarea { min-height:100px; resize:vertical; }" +
             ".stats { text-align:center; margin-bottom:20px; font-size:18px; }" +
-            ".message { text-align:center; font-weight:bold; padding:10px; border-radius:6px; margin-bottom:20px; }" +
+            ".message { text-align:center; font-weight:bold; padding:12px; border-radius:8px; margin-bottom:20px; }" +
             ".success { color:green; background:#eafaf1; }" +
             ".error { color:#b00020; background:#fdecea; }" +
-            ".empty-message { text-align:center; background:white; padding:20px; border-radius:8px; box-shadow:0 2px 8px rgba(0,0,0,0.1); font-weight:bold; color:#555; }" +
-            ".highlight-box { background:#e8f5e9; padding:15px; border-radius:10px; margin-bottom:20px; text-align:center; box-shadow:0 2px 8px rgba(0,0,0,0.08); }" +
+            ".empty-message { text-align:center; background:white; padding:24px; border-radius:12px; box-shadow:0 2px 8px rgba(0,0,0,0.1); font-weight:bold; color:#555; margin-top:20px; }" +
+            ".highlight-box { background:#e8f5e9; padding:16px; border-radius:12px; margin-bottom:20px; text-align:center; box-shadow:0 2px 8px rgba(0,0,0,0.08); }" +
             ".progress-bar { height:20px; border-radius:8px; transition: width 0.8s ease-in-out; }" +
             ".card { display:inline-block; width:180px; margin:10px; padding:20px; background:white; border-radius:12px; box-shadow:0 2px 8px rgba(0,0,0,0.08); text-align:center; vertical-align:top; }" +
             ".card-title { font-size:14px; color:#666; margin-bottom:8px; }" +
             ".card-value { font-size:28px; font-weight:bold; }" +
-            ".favorites-box { background:#fff8e1; padding:16px; border-radius:10px; margin-top:20px; box-shadow:0 2px 8px rgba(0,0,0,0.06); }" +
+            ".favorites-box { background:#fff8e1; padding:16px; border-radius:12px; margin-top:20px; box-shadow:0 2px 8px rgba(0,0,0,0.06); }" +
             ".recent-item { background:white; padding:12px 16px; margin-bottom:10px; border-radius:10px; box-shadow:0 2px 8px rgba(0,0,0,0.06); }" +
             ".subtitle { text-align:center; font-size:18px; color:#555; margin-top:-8px; margin-bottom:24px; }" +
+            ".badge { color:white; padding:4px 8px; border-radius:6px; font-size:13px; font-weight:bold; display:inline-block; }" +
+            ".section-box { background:white; padding:18px; border-radius:12px; box-shadow:0 2px 8px rgba(0,0,0,0.06); margin-top:20px; }" +
+            ".muted { color:#666; font-size:14px; }" +
+            ".form-box { max-width:420px; margin:0 auto; background:white; padding:24px; border-radius:12px; box-shadow:0 2px 8px rgba(0,0,0,0.08); }" +
+            ".two-column { display:grid; grid-template-columns: 1fr 1fr; gap:20px; margin-top:20px; }" +
+            "@media (max-width: 900px) { .two-column { grid-template-columns: 1fr; } .container { width:92%; } }" +
             "</style>" +
             "</head>" +
             "<body><div class=\"container\">" +
@@ -64,6 +73,17 @@ let main args =
         | Interview -> "orange"
         | Rejected -> "red"
 
+    let priorityToColor priority =
+        match priority with
+        | Low -> "#6c757d"
+        | Medium -> "#f39c12"
+        | High -> "#c0392b"
+
+    let formatFollowUpDate (dateOpt: DateTime option) =
+        match dateOpt with
+        | Some d -> d.ToString("yyyy-MM-dd")
+        | None -> "-"
+
     let cardHtml title value color =
         "<div class=\"card\">" +
         "<div class=\"card-title\">" + title + "</div>" +
@@ -73,8 +93,7 @@ let main args =
     let applications = ResizeArray<Application>()
 
     let getNextId () =
-        if applications.Count = 0 then
-            1
+        if applications.Count = 0 then 1
         else
             applications
             |> Seq.map (fun a -> a.Id)
@@ -90,6 +109,8 @@ let main args =
             Status = Applied
             Notes = "Applied through website"
             IsFavorite = false
+            FollowUpDate = Some(DateTime(2026, 4, 25))
+            Priority = High
         }
     )
 
@@ -102,6 +123,8 @@ let main args =
             Status = Interview
             Notes = "HR round done"
             IsFavorite = true
+            FollowUpDate = Some(DateTime(2026, 4, 23))
+            Priority = High
         }
     )
 
@@ -114,6 +137,8 @@ let main args =
             Status = Rejected
             Notes = "Rejected email"
             IsFavorite = false
+            FollowUpDate = None
+            Priority = Low
         }
     )
 
@@ -148,50 +173,54 @@ let main args =
     app.MapGet("/applications-page", Func<HttpContext, IResult>(fun ctx ->
         let search = ctx.Request.Query["search"].ToString().Trim()
         let statusFilter = ctx.Request.Query["status"].ToString()
+        let priorityFilter = ctx.Request.Query["priority"].ToString()
         let successMessage = ctx.Request.Query["success"].ToString()
         let errorMessage = ctx.Request.Query["error"].ToString()
         let sort = ctx.Request.Query["sort"].ToString()
 
         let successHtml =
-            if String.IsNullOrWhiteSpace(successMessage) then
-                ""
-            else
-                "<div class=\"message success\">" + successMessage + "</div>"
+            if String.IsNullOrWhiteSpace(successMessage) then ""
+            else "<div class=\"message success\">" + successMessage + "</div>"
 
         let errorHtml =
-            if String.IsNullOrWhiteSpace(errorMessage) then
-                ""
-            else
-                "<div class=\"message error\">" + errorMessage + "</div>"
+            if String.IsNullOrWhiteSpace(errorMessage) then ""
+            else "<div class=\"message error\">" + errorMessage + "</div>"
 
         let statusOption =
-            if String.IsNullOrWhiteSpace(statusFilter) then
-                None
-            else
-                parseStatus statusFilter
+            if String.IsNullOrWhiteSpace(statusFilter) then None
+            else parseStatus statusFilter
+
+        let priorityOption =
+            if String.IsNullOrWhiteSpace(priorityFilter) then None
+            else parsePriority priorityFilter
 
         let filtered =
             applications
             |> Seq.toList
-            |> filterBySearchAndStatus search statusOption
+            |> filterBySearchStatusAndPriority search statusOption priorityOption
 
         let sorted =
             match sort with
             | "company" -> filtered |> List.sortBy (fun a -> a.Company)
+            | "priority" ->
+                filtered
+                |> List.sortByDescending (fun a ->
+                    match a.Priority with
+                    | High -> 3
+                    | Medium -> 2
+                    | Low -> 1)
             | _ -> filtered |> List.sortByDescending (fun a -> a.DateApplied)
 
         let latestApplication =
-            if List.isEmpty(sorted) then
-                None
-            else
-                Some (sorted |> List.maxBy (fun a -> a.DateApplied))
+            if List.isEmpty(sorted) then None
+            else Some (sorted |> List.maxBy (fun a -> a.DateApplied))
 
         let latestHtml =
             match latestApplication with
             | Some a ->
                 "<div class=\"highlight-box\">" +
                 "<b>Latest application:</b> " + a.Company + " - " + a.Position +
-                " <span style=\"background:" + statusColor a.Status + ";color:white;padding:4px 8px;border-radius:5px;margin-left:8px;\">" +
+                " <span class=\"badge\" style=\"background:" + statusColor a.Status + "; margin-left:8px;\">" +
                 statusToString a.Status +
                 "</span></div>"
             | None ->
@@ -203,6 +232,8 @@ let main args =
         let appliedCount = stats.Applied
         let interviewCount = stats.Interview
         let rejectedCount = stats.Rejected
+        let favoriteCount = stats.Favorites
+        let highPriorityCount = stats.HighPriority
 
         let rejectionRate =
             if totalCount = 0 then
@@ -253,23 +284,57 @@ let main args =
 
                 "<h2 style=\"margin-top:30px;\">Recent Applications</h2>" + items
 
+        let upcomingActions =
+            applications
+            |> Seq.toList
+            |> List.choose (fun a ->
+                match a.FollowUpDate with
+                | Some d -> Some (a, d)
+                | None -> None)
+            |> List.sortBy snd
+            |> List.truncate 5
+
+        let upcomingActionsHtml =
+            if List.isEmpty(upcomingActions) then
+                "<div class=\"section-box\"><h2>Upcoming Actions</h2><div class=\"muted\">No follow-up dates set yet.</div></div>"
+            else
+                let today = DateTime.Today
+
+                let items =
+                    upcomingActions
+                    |> List.map (fun (a, d) ->
+                        let overdue =
+                            if d.Date < today then
+                                "<span class=\"badge\" style=\"background:#c0392b; margin-left:8px;\">Overdue</span>"
+                            else
+                                ""
+
+                        "<div style=\"padding:10px 0;border-bottom:1px solid #eee;\">" +
+                        "<b>" + a.Company + "</b> - " + a.Position +
+                        "<div class=\"muted\" style=\"margin-top:4px;\">Follow-up: " + d.ToString("yyyy-MM-dd") + overdue + "</div>" +
+                        "</div>"
+                    )
+                    |> String.concat ""
+
+                "<div class=\"section-box\"><h2>Upcoming Actions</h2>" + items + "</div>"
+
         let rows =
             sorted
             |> List.map (fun a ->
                 let color = statusColor a.Status
                 let statusText = statusToString a.Status
-                let favoritePrefix =
-                    if a.IsFavorite then "⭐ "
-                    else ""
-
-                let favoriteActionText =
-                    if a.IsFavorite then "Unfavorite"
-                    else "Favorite"
+                let favoritePrefix = if a.IsFavorite then "⭐ " else ""
+                let favoriteActionText = if a.IsFavorite then "Unfavorite" else "Favorite"
+                let priorityText = priorityToString a.Priority
+                let priorityColor = priorityToColor a.Priority
+                let followUpText = formatFollowUpDate a.FollowUpDate
 
                 "<tr>" +
                 "<td>" + favoritePrefix + a.Company + "</td>" +
                 "<td>" + a.Position + "</td>" +
-                "<td><span style=\"background:" + color + ";color:white;padding:4px 8px;border-radius:5px;\">" + statusText + "</span></td>" +
+                "<td><span class=\"badge\" style=\"background:" + color + ";\">" + statusText + "</span></td>" +
+                "<td><span class=\"badge\" style=\"background:" + priorityColor + ";\">" + priorityText + "</span></td>" +
+                "<td>" + followUpText + "</td>" +
                 "<td>" + a.DateApplied.ToString("yyyy-MM-dd") + "</td>" +
                 "<td>" + a.Notes + "</td>" +
                 "<td>" +
@@ -282,48 +347,26 @@ let main args =
             )
             |> String.concat ""
 
-        let selectedStatusAll =
-            if String.IsNullOrWhiteSpace(statusFilter) then
-                "selected"
-            else
-                ""
+        let selectedStatusAll = if String.IsNullOrWhiteSpace(statusFilter) then "selected" else ""
+        let selectedStatusApplied = if statusFilter = "Applied" then "selected" else ""
+        let selectedStatusInterview = if statusFilter = "Interview" then "selected" else ""
+        let selectedStatusRejected = if statusFilter = "Rejected" then "selected" else ""
 
-        let selectedStatusApplied =
-            if statusFilter = "Applied" then
-                "selected"
-            else
-                ""
+        let selectedPriorityAll = if String.IsNullOrWhiteSpace(priorityFilter) then "selected" else ""
+        let selectedPriorityLow = if priorityFilter = "Low" then "selected" else ""
+        let selectedPriorityMedium = if priorityFilter = "Medium" then "selected" else ""
+        let selectedPriorityHigh = if priorityFilter = "High" then "selected" else ""
 
-        let selectedStatusInterview =
-            if statusFilter = "Interview" then
-                "selected"
-            else
-                ""
-
-        let selectedStatusRejected =
-            if statusFilter = "Rejected" then
-                "selected"
-            else
-                ""
-
-        let selectedDate =
-            if String.IsNullOrWhiteSpace(sort) || sort = "date" then
-                "selected"
-            else
-                ""
-
-        let selectedCompany =
-            if sort = "company" then
-                "selected"
-            else
-                ""
+        let selectedDate = if String.IsNullOrWhiteSpace(sort) || sort = "date" then "selected" else ""
+        let selectedCompany = if sort = "company" then "selected" else ""
+        let selectedPrioritySort = if sort = "priority" then "selected" else ""
 
         let applicationsContent =
             if List.isEmpty(sorted) then
                 "<div class=\"empty-message\">No applications found</div>"
             else
                 "<table>" +
-                "<tr><th>Company</th><th>Position</th><th>Status</th><th>Date</th><th>Notes</th><th>Action</th></tr>" +
+                "<tr><th>Company</th><th>Position</th><th>Status</th><th>Priority</th><th>Follow-up</th><th>Date</th><th>Notes</th><th>Action</th></tr>" +
                 rows +
                 "</table>"
 
@@ -337,6 +380,8 @@ let main args =
             cardHtml "Applied" (string appliedCount) "green" +
             cardHtml "Interview" (string interviewCount) "orange" +
             cardHtml "Rejected" (string rejectedCount) "red" +
+            cardHtml "Favorites" (string favoriteCount) "#f1c40f" +
+            cardHtml "High Priority" (string highPriorityCount) "#c0392b" +
             "</div>" +
             "<div style=\"text-align:center;margin-bottom:20px;\">" +
             "<div style=\"display:inline-block;background:white;padding:12px 18px;border-radius:10px;box-shadow:0 2px 8px rgba(0,0,0,0.06);margin:6px;\"><b>Rejection rate:</b> " + rejectionRate + "</div>" +
@@ -348,46 +393,57 @@ let main args =
             "<form method=\"get\" action=\"/applications-page\" style=\"text-align:center;margin-bottom:20px;\">" +
             "<input name=\"search\" value=\"" + search + "\" placeholder=\"Search\" /> " +
             "<select name=\"status\">" +
-            "<option value=\"\" " + selectedStatusAll + ">All</option>" +
+            "<option value=\"\" " + selectedStatusAll + ">All Statuses</option>" +
             "<option value=\"Applied\" " + selectedStatusApplied + ">Applied</option>" +
             "<option value=\"Interview\" " + selectedStatusInterview + ">Interview</option>" +
             "<option value=\"Rejected\" " + selectedStatusRejected + ">Rejected</option>" +
             "</select> " +
+            "<select name=\"priority\">" +
+            "<option value=\"\" " + selectedPriorityAll + ">All Priorities</option>" +
+            "<option value=\"Low\" " + selectedPriorityLow + ">Low</option>" +
+            "<option value=\"Medium\" " + selectedPriorityMedium + ">Medium</option>" +
+            "<option value=\"High\" " + selectedPriorityHigh + ">High</option>" +
+            "</select> " +
             "<select name=\"sort\">" +
             "<option value=\"date\" " + selectedDate + ">Date</option>" +
             "<option value=\"company\" " + selectedCompany + ">Company</option>" +
+            "<option value=\"priority\" " + selectedPrioritySort + ">Priority</option>" +
             "</select> " +
             "<button class=\"btn\" type=\"submit\">Filter</button> " +
-            "<a class=\"btn\" href=\"/applications-page\">Clear</a>" +
+            "<a class=\"btn btn-secondary\" href=\"/applications-page\">Clear</a>" +
             "</form>" +
             applicationsContent +
-            favoritesHtml +
+            "<div class=\"two-column\">" +
+            upcomingActionsHtml +
+            (if String.IsNullOrWhiteSpace(favoritesHtml) then "<div></div>" else favoritesHtml) +
+            "</div>" +
             recentHtml
 
         htmlPage "Applications" body
     )) |> ignore
 
     app.MapGet("/application/{id}", Func<int, IResult>(fun id ->
-        let item =
-            applications |> Seq.tryFind (fun a -> a.Id = id)
+        let item = applications |> Seq.tryFind (fun a -> a.Id = id)
 
         match item with
         | Some a ->
             let color = statusColor a.Status
             let statusText = statusToString a.Status
-            let favoriteText =
-                if a.IsFavorite then "Yes"
-                else "No"
+            let favoriteText = if a.IsFavorite then "Yes" else "No"
 
             let body =
                 "<h1>Application Details</h1>" +
+                "<div class=\"form-box\" style=\"max-width:700px;\">" +
                 "<p><b>Company:</b> " + a.Company + "</p>" +
                 "<p><b>Position:</b> " + a.Position + "</p>" +
-                "<p><b>Status:</b> <span style=\"background:" + color + ";color:white;padding:4px 8px;border-radius:5px;\">" + statusText + "</span></p>" +
+                "<p><b>Status:</b> <span class=\"badge\" style=\"background:" + color + ";\">" + statusText + "</span></p>" +
+                "<p><b>Priority:</b> <span class=\"badge\" style=\"background:" + priorityToColor a.Priority + ";\">" + priorityToString a.Priority + "</span></p>" +
                 "<p><b>Date applied:</b> " + a.DateApplied.ToString("yyyy-MM-dd") + "</p>" +
+                "<p><b>Follow-up date:</b> " + formatFollowUpDate a.FollowUpDate + "</p>" +
                 "<p><b>Notes:</b> " + a.Notes + "</p>" +
                 "<p><b>Favorite:</b> " + favoriteText + "</p>" +
-                "<p><a href=\"/applications-page\">Back to list</a></p>"
+                "<p><a href=\"/applications-page\">Back to list</a></p>" +
+                "</div>"
 
             htmlPage "Details" body
         | None ->
@@ -398,14 +454,13 @@ let main args =
         let errorMessage = ctx.Request.Query["error"].ToString()
 
         let errorHtml =
-            if String.IsNullOrWhiteSpace(errorMessage) then
-                ""
-            else
-                "<div class=\"message error\">" + errorMessage + "</div>"
+            if String.IsNullOrWhiteSpace(errorMessage) then ""
+            else "<div class=\"message error\">" + errorMessage + "</div>"
 
         let body =
             "<h1>Add Application</h1>" +
             errorHtml +
+            "<div class=\"form-box\">" +
             "<form method=\"post\" action=\"/applications\">" +
             "<input name=\"company\" placeholder=\"Company\" /><br/>" +
             "<input name=\"position\" placeholder=\"Position\" /><br/>" +
@@ -414,10 +469,17 @@ let main args =
             "<option value=\"Interview\">Interview</option>" +
             "<option value=\"Rejected\">Rejected</option>" +
             "</select><br/>" +
+            "<select name=\"priority\">" +
+            "<option value=\"Low\">Low</option>" +
+            "<option value=\"Medium\" selected>Medium</option>" +
+            "<option value=\"High\">High</option>" +
+            "</select><br/>" +
+            "<input type=\"date\" name=\"followUpDate\" /><br/>" +
             "<textarea name=\"notes\" placeholder=\"Notes\"></textarea><br/>" +
             "<button class=\"btn\" type=\"submit\">Save</button>" +
             "</form>" +
-            "<p><a href=\"/applications-page\">Back to list</a></p>"
+            "<p><a href=\"/applications-page\">Back to list</a></p>" +
+            "</div>"
 
         htmlPage "Add Application" body
     )) |> ignore
@@ -430,14 +492,23 @@ let main args =
         let company = get "company"
         let position = get "position"
         let status = get "status"
+        let priority = get "priority"
+        let followUpDateRaw = get "followUpDate"
         let notes = get "notes"
 
-        match validateApplication company position status with
+        match validateApplication company position status priority with
         | Some error ->
             Results.Redirect("/add-application?error=" + Uri.EscapeDataString(error))
         | None ->
             let statusValue =
                 parseStatus status |> Option.defaultValue Applied
+
+            let priorityValue =
+                parsePriority priority |> Option.defaultValue Medium
+
+            let followUpDate =
+                if String.IsNullOrWhiteSpace(followUpDateRaw) then None
+                else tryParseDate followUpDateRaw
 
             let newApp =
                 {
@@ -448,6 +519,8 @@ let main args =
                     Status = statusValue
                     Notes = notes
                     IsFavorite = false
+                    FollowUpDate = followUpDate
+                    Priority = priorityValue
                 }
 
             applications.Add(newApp)
@@ -457,8 +530,7 @@ let main args =
     app.MapGet("/edit/{id}", Func<HttpContext, int, IResult>(fun ctx id ->
         let errorMessage = ctx.Request.Query["error"].ToString()
 
-        let item =
-            applications |> Seq.tryFind (fun a -> a.Id = id)
+        let item = applications |> Seq.tryFind (fun a -> a.Id = id)
 
         match item with
         | Some a ->
@@ -466,15 +538,23 @@ let main args =
             let selectedInterview = if a.Status = Interview then "selected" else ""
             let selectedRejected = if a.Status = Rejected then "selected" else ""
 
+            let selectedLow = if a.Priority = Low then "selected" else ""
+            let selectedMedium = if a.Priority = Medium then "selected" else ""
+            let selectedHigh = if a.Priority = High then "selected" else ""
+
+            let followUpValue =
+                match a.FollowUpDate with
+                | Some d -> d.ToString("yyyy-MM-dd")
+                | None -> ""
+
             let errorHtml =
-                if String.IsNullOrWhiteSpace(errorMessage) then
-                    ""
-                else
-                    "<div class=\"message error\">" + errorMessage + "</div>"
+                if String.IsNullOrWhiteSpace(errorMessage) then ""
+                else "<div class=\"message error\">" + errorMessage + "</div>"
 
             let body =
                 "<h1>Edit Application</h1>" +
                 errorHtml +
+                "<div class=\"form-box\">" +
                 "<form method=\"post\" action=\"/update/" + string a.Id + "\">" +
                 "<input name=\"company\" value=\"" + a.Company + "\" /><br/>" +
                 "<input name=\"position\" value=\"" + a.Position + "\" /><br/>" +
@@ -483,10 +563,17 @@ let main args =
                 "<option value=\"Interview\" " + selectedInterview + ">Interview</option>" +
                 "<option value=\"Rejected\" " + selectedRejected + ">Rejected</option>" +
                 "</select><br/>" +
+                "<select name=\"priority\">" +
+                "<option value=\"Low\" " + selectedLow + ">Low</option>" +
+                "<option value=\"Medium\" " + selectedMedium + ">Medium</option>" +
+                "<option value=\"High\" " + selectedHigh + ">High</option>" +
+                "</select><br/>" +
+                "<input type=\"date\" name=\"followUpDate\" value=\"" + followUpValue + "\" /><br/>" +
                 "<textarea name=\"notes\">" + a.Notes + "</textarea><br/>" +
                 "<button class=\"btn\" type=\"submit\">Update</button>" +
                 "</form>" +
-                "<p><a href=\"/applications-page\">Back to list</a></p>"
+                "<p><a href=\"/applications-page\">Back to list</a></p>" +
+                "</div>"
 
             htmlPage "Edit Application" body
         | None ->
@@ -498,22 +585,32 @@ let main args =
             if req.Form.ContainsKey(name) then req.Form[name].ToString().Trim()
             else fallback
 
-        let existing =
-            applications |> Seq.tryFind (fun a -> a.Id = id)
+        let existing = applications |> Seq.tryFind (fun a -> a.Id = id)
 
         match existing with
         | Some oldItem ->
             let company = get "company" oldItem.Company
             let position = get "position" oldItem.Position
             let status = get "status" (statusToString oldItem.Status)
+            let priority = get "priority" (priorityToString oldItem.Priority)
+            let followUpDateRaw = get "followUpDate" (formatFollowUpDate oldItem.FollowUpDate)
             let notes = get "notes" oldItem.Notes
 
-            match validateApplication company position status with
+            match validateApplication company position status priority with
             | Some error ->
                 Results.Redirect("/edit/" + string id + "?error=" + Uri.EscapeDataString(error))
             | None ->
                 let statusValue =
                     parseStatus status |> Option.defaultValue oldItem.Status
+
+                let priorityValue =
+                    parsePriority priority |> Option.defaultValue oldItem.Priority
+
+                let followUpDate =
+                    if String.IsNullOrWhiteSpace(followUpDateRaw) || followUpDateRaw = "-" then
+                        None
+                    else
+                        tryParseDate followUpDateRaw
 
                 let index = applications |> Seq.findIndex (fun a -> a.Id = id)
 
@@ -526,6 +623,8 @@ let main args =
                         Status = statusValue
                         Notes = notes
                         IsFavorite = oldItem.IsFavorite
+                        FollowUpDate = followUpDate
+                        Priority = priorityValue
                     }
 
                 Results.Redirect("/applications-page?success=Application updated successfully")
@@ -548,6 +647,8 @@ let main args =
         let applied = stats.Applied
         let interview = stats.Interview
         let rejected = stats.Rejected
+        let favorites = stats.Favorites
+        let highPriority = stats.HighPriority
 
         let appliedPercent = percentage applied total
         let interviewPercent = percentage interview total
@@ -572,16 +673,17 @@ let main args =
                 |> Seq.maxBy (fun (_, apps) -> Seq.length apps)
                 |> fun (status, _) -> statusToString status
 
-        let favoriteCount =
-            applications
-            |> Seq.filter (fun a -> a.IsFavorite)
-            |> Seq.length
-
         let body =
             "<h1>Statistics</h1>" +
-            "<div class=\"stats\">" +
-
-            "<p><b>Total applications:</b> " + string total + "</p>" +
+            "<div style=\"text-align:center;margin-bottom:25px;\">" +
+            cardHtml "Total" (string total) "#2c3e50" +
+            cardHtml "Applied" (string applied) "green" +
+            cardHtml "Interview" (string interview) "orange" +
+            cardHtml "Rejected" (string rejected) "red" +
+            cardHtml "Favorites" (string favorites) "#f1c40f" +
+            cardHtml "High Priority" (string highPriority) "#c0392b" +
+            "</div>" +
+            "<div class=\"section-box stats\">" +
 
             "<p><b>Applied:</b> " + string applied + " (" + appliedPercent.ToString("0.0") + "%)</p>" +
             "<div style=\"width:300px;margin:0 auto 15px auto;background:#ddd;border-radius:8px;overflow:hidden;\">" +
@@ -600,10 +702,11 @@ let main args =
 
             "<p><b>Latest application:</b> " + latest + "</p>" +
             "<p><b>Most common status:</b> " + mostCommonStatus + "</p>" +
-            "<p><b>Favorite applications:</b> " + string favoriteCount + "</p>" +
+            "<p><b>Favorite applications:</b> " + string favorites + "</p>" +
+            "<p><b>High priority applications:</b> " + string highPriority + "</p>" +
             "</div>" +
 
-            "<p style=\"text-align:center;\">" +
+            "<p style=\"text-align:center; margin-top:20px;\">" +
             "<a class=\"btn\" href=\"/applications-page\">Back to applications</a>" +
             "</p>"
 
