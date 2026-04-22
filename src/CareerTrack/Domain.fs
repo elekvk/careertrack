@@ -7,6 +7,11 @@ type ApplicationStatus =
     | Interview
     | Rejected
 
+type Priority =
+    | Low
+    | Medium
+    | High
+
 type Application =
     {
         Id: int
@@ -16,6 +21,8 @@ type Application =
         Status: ApplicationStatus
         Notes: string
         IsFavorite: bool
+        FollowUpDate: DateTime option
+        Priority: Priority
     }
 
 type State =
@@ -36,6 +43,8 @@ let initialState =
                     Status = Applied
                     Notes = "Applied through website"
                     IsFavorite = false
+                    FollowUpDate = Some(DateTime(2026, 4, 25))
+                    Priority = High
                 }
                 {
                     Id = 2
@@ -45,6 +54,8 @@ let initialState =
                     Status = Interview
                     Notes = "HR round done"
                     IsFavorite = true
+                    FollowUpDate = Some(DateTime(2026, 4, 23))
+                    Priority = High
                 }
                 {
                     Id = 3
@@ -54,6 +65,8 @@ let initialState =
                     Status = Rejected
                     Notes = "Rejected email"
                     IsFavorite = false
+                    FollowUpDate = None
+                    Priority = Low
                 }
             ]
         SearchText = ""
@@ -79,12 +92,29 @@ let filterBySearchAndStatus (search: string) (status: ApplicationStatus option) 
     |> List.filter (matchesSearch search)
     |> List.filter (matchesStatus status)
 
+let matchesPriority (priorityFilter: Priority option) (app: Application) =
+    match priorityFilter with
+    | None -> true
+    | Some p -> app.Priority = p
+
+let filterBySearchStatusAndPriority
+    (search: string)
+    (status: ApplicationStatus option)
+    (priority: Priority option)
+    (apps: Application list) =
+    apps
+    |> List.filter (matchesSearch search)
+    |> List.filter (matchesStatus status)
+    |> List.filter (matchesPriority priority)
+
 type Statistics =
     {
         Total: int
         Applied: int
         Interview: int
         Rejected: int
+        Favorites: int
+        HighPriority: int
     }
 
 let emptyStatistics =
@@ -93,30 +123,33 @@ let emptyStatistics =
         Applied = 0
         Interview = 0
         Rejected = 0
+        Favorites = 0
+        HighPriority = 0
     }
 
 let calculateStatistics (apps: Application list) =
     apps
     |> List.fold (fun acc app ->
-        match app.Status with
-        | Applied ->
-            {
-                acc with
+        let updatedAcc =
+            match app.Status with
+            | Applied ->
+                { acc with
                     Total = acc.Total + 1
-                    Applied = acc.Applied + 1
-            }
-        | Interview ->
-            {
-                acc with
+                    Applied = acc.Applied + 1 }
+            | Interview ->
+                { acc with
                     Total = acc.Total + 1
-                    Interview = acc.Interview + 1
-            }
-        | Rejected ->
-            {
-                acc with
+                    Interview = acc.Interview + 1 }
+            | Rejected ->
+                { acc with
                     Total = acc.Total + 1
-                    Rejected = acc.Rejected + 1
-            }
+                    Rejected = acc.Rejected + 1 }
+
+        {
+            updatedAcc with
+                Favorites = updatedAcc.Favorites + (if app.IsFavorite then 1 else 0)
+                HighPriority = updatedAcc.HighPriority + (if app.Priority = High then 1 else 0)
+        }
     ) emptyStatistics
 
 let parseStatus (status: string) =
@@ -126,13 +159,28 @@ let parseStatus (status: string) =
     | "Rejected" -> Some Rejected
     | _ -> None
 
-let validateApplication company position status =
+let parsePriority (priority: string) =
+    match priority with
+    | "Low" -> Some Low
+    | "Medium" -> Some Medium
+    | "High" -> Some High
+    | _ -> None
+
+let priorityToString priority =
+    match priority with
+    | Low -> "Low"
+    | Medium -> "Medium"
+    | High -> "High"
+
+let validateApplication company position status priority =
     if String.IsNullOrWhiteSpace(company) then
         Some "Company is required."
     elif String.IsNullOrWhiteSpace(position) then
         Some "Position is required."
     elif Option.isNone (parseStatus status) then
         Some "Invalid status selected."
+    elif Option.isNone (parsePriority priority) then
+        Some "Invalid priority selected."
     else
         None
 
@@ -141,3 +189,8 @@ let percentage part total =
         0.0
     else
         (float part / float total) * 100.0
+
+let tryParseDate (value: string) =
+    match DateTime.TryParse(value) with
+    | true, date -> Some date
+    | _ -> None
