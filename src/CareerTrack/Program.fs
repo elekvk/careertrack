@@ -183,6 +183,7 @@ let main args =
                     | Medium -> 2
                     | Low -> 1)
             | _ ->
+                // default: latest applications first
                 filtered |> List.sortByDescending (fun a -> a.DateApplied)
 
         let latestApplication =
