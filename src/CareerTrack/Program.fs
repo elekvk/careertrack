@@ -18,42 +18,301 @@ let main args =
             "<meta name=\"viewport\" content=\"width=device-width, initial-scale=1.0\">" +
             "<title>" + title + "</title>" +
             "<style>" +
-            "body { font-family: Arial; background-color: #f4f6f8; margin:0; padding:0; color:#2c3e50; }" +
-            "body, input, select, textarea, button { font-family: Arial, sans-serif; }" +
-            "h1 { text-align:center; color:#2c3e50; margin-bottom:8px; }" +
-            "h2 { color:#2c3e50; }" +
-            ".container { width: 85%; max-width: 1200px; margin: auto; padding: 24px; }" +
-            "table { width: 100%; border-collapse: collapse; background:white; box-shadow:0 2px 8px rgba(0,0,0,0.1); border-radius:12px; overflow:hidden; }" +
-            "th, td { padding: 12px; border-bottom: 1px solid #eee; text-align:left; vertical-align:top; }" +
-            "th { background-color: #2c3e50; color:white; }" +
-            "tr:hover { background-color: #f9fbfc; }" +
-            "a { text-decoration:none; color:#3498db; font-weight:bold; }" +
-            "a:hover { text-decoration:underline; }" +
-            ".btn { display:inline-block; padding:10px 15px; background:#3498db; color:white; border-radius:8px; border:none; cursor:pointer; margin:4px; font-weight:bold; }" +
-            ".btn:hover { background:#2980b9; text-decoration:none; }" +
-            ".btn-secondary { background:#7f8c8d; }" +
-            ".btn-secondary:hover { background:#6c7a7a; }" +
-            "input, select, textarea { padding:10px; width:320px; max-width:100%; margin-bottom:10px; border:1px solid #dcdfe3; border-radius:8px; box-sizing:border-box; }" +
-            "textarea { min-height:100px; resize:vertical; }" +
-            ".stats { text-align:center; margin-bottom:20px; font-size:18px; }" +
-            ".message { text-align:center; font-weight:bold; padding:12px; border-radius:8px; margin-bottom:20px; }" +
-            ".success { color:green; background:#eafaf1; }" +
-            ".error { color:#b00020; background:#fdecea; }" +
-            ".empty-message { text-align:center; background:white; padding:24px; border-radius:12px; box-shadow:0 2px 8px rgba(0,0,0,0.1); font-weight:bold; color:#555; margin-top:20px; }" +
-            ".highlight-box { background:#e8f5e9; padding:16px; border-radius:12px; margin-bottom:20px; text-align:center; box-shadow:0 2px 8px rgba(0,0,0,0.08); }" +
-            ".progress-bar { height:20px; border-radius:8px; transition: width 0.8s ease-in-out; }" +
-            ".card { display:inline-block; width:180px; margin:10px; padding:20px; background:white; border-radius:12px; box-shadow:0 2px 8px rgba(0,0,0,0.08); text-align:center; vertical-align:top; }" +
-            ".card-title { font-size:14px; color:#666; margin-bottom:8px; }" +
-            ".card-value { font-size:28px; font-weight:bold; }" +
-            ".favorites-box { background:#fff8e1; padding:16px; border-radius:12px; margin-top:20px; box-shadow:0 2px 8px rgba(0,0,0,0.06); }" +
-            ".recent-item { background:white; padding:12px 16px; margin-bottom:10px; border-radius:10px; box-shadow:0 2px 8px rgba(0,0,0,0.06); }" +
-            ".subtitle { text-align:center; font-size:18px; color:#555; margin-top:-8px; margin-bottom:24px; }" +
-            ".badge { color:white; padding:4px 8px; border-radius:6px; font-size:13px; font-weight:bold; display:inline-block; }" +
-            ".section-box { background:white; padding:18px; border-radius:12px; box-shadow:0 2px 8px rgba(0,0,0,0.06); margin-top:20px; }" +
-            ".muted { color:#666; font-size:14px; }" +
-            ".form-box { max-width:420px; margin:0 auto; background:white; padding:24px; border-radius:12px; box-shadow:0 2px 8px rgba(0,0,0,0.08); }" +
-            ".two-column { display:grid; grid-template-columns: 1fr 1fr; gap:20px; margin-top:20px; }" +
-            "@media (max-width: 900px) { .two-column { grid-template-columns: 1fr; } .container { width:92%; } }" +
+            ":root {" +
+            "  --bg: #f5f7fb;" +
+            "  --bg-accent: #eef2ff;" +
+            "  --surface: rgba(255,255,255,0.88);" +
+            "  --surface-strong: #ffffff;" +
+            "  --text: #172033;" +
+            "  --muted: #6b7280;" +
+            "  --border: rgba(15, 23, 42, 0.08);" +
+            "  --primary: #4f46e5;" +
+            "  --primary-hover: #4338ca;" +
+            "  --secondary: #0f172a;" +
+            "  --success: #16a34a;" +
+            "  --warning: #f59e0b;" +
+            "  --danger: #dc2626;" +
+            "  --shadow: 0 10px 30px rgba(15, 23, 42, 0.08);" +
+            "  --shadow-soft: 0 6px 20px rgba(15, 23, 42, 0.06);" +
+            "  --radius: 18px;" +
+            "}" +
+            "* { box-sizing: border-box; }" +
+            "html { scroll-behavior: smooth; }" +
+            "body {" +
+            "  font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;" +
+            "  background:" +
+            "    radial-gradient(circle at top left, #e0e7ff 0%, transparent 32%)," +
+            "    radial-gradient(circle at top right, #dbeafe 0%, transparent 28%)," +
+            "    linear-gradient(180deg, #f8fafc 0%, #eef2f7 100%);" +
+            "  margin: 0;" +
+            "  padding: 0;" +
+            "  color: var(--text);" +
+            "}" +
+            "body, input, select, textarea, button {" +
+            "  font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;" +
+            "}" +
+            ".container {" +
+            "  width: min(1180px, 92%);" +
+            "  margin: 32px auto 48px auto;" +
+            "  padding: 28px;" +
+            "  background: var(--surface);" +
+            "  backdrop-filter: blur(14px);" +
+            "  border: 1px solid rgba(255,255,255,0.55);" +
+            "  border-radius: 28px;" +
+            "  box-shadow: var(--shadow);" +
+            "}" +
+            "h1 {" +
+            "  text-align: center;" +
+            "  color: var(--text);" +
+            "  margin: 0 0 10px 0;" +
+            "  font-size: clamp(2rem, 4vw, 3rem);" +
+            "  font-weight: 800;" +
+            "  letter-spacing: -0.03em;" +
+            "}" +
+            "h2 {" +
+            "  color: var(--text);" +
+            "  margin-top: 0;" +
+            "  font-size: 1.25rem;" +
+            "  font-weight: 700;" +
+            "}" +
+            ".subtitle {" +
+            "  text-align: center;" +
+            "  font-size: 1.05rem;" +
+            "  color: var(--muted);" +
+            "  margin-top: -2px;" +
+            "  margin-bottom: 22px;" +
+            "}" +
+            "p { line-height: 1.6; }" +
+            "a {" +
+            "  text-decoration: none;" +
+            "  color: var(--primary);" +
+            "  font-weight: 600;" +
+            "  transition: 0.2s ease;" +
+            "}" +
+            "a:hover {" +
+            "  color: var(--primary-hover);" +
+            "}" +
+            ".btn {" +
+            "  display: inline-flex;" +
+            "  align-items: center;" +
+            "  justify-content: center;" +
+            "  gap: 8px;" +
+            "  padding: 12px 18px;" +
+            "  background: linear-gradient(135deg, var(--primary) 0%, #6366f1 100%);" +
+            "  color: white;" +
+            "  border-radius: 14px;" +
+            "  border: 0;" +
+            "  cursor: pointer;" +
+            "  margin: 4px;" +
+            "  font-weight: 700;" +
+            "  font-size: 0.95rem;" +
+            "  box-shadow: 0 8px 20px rgba(79, 70, 229, 0.22);" +
+            "  transition: transform 0.18s ease, box-shadow 0.18s ease, background 0.18s ease;" +
+            "}" +
+            ".btn:hover {" +
+            "  transform: translateY(-1px);" +
+            "  background: linear-gradient(135deg, var(--primary-hover) 0%, #4f46e5 100%);" +
+            "  color: white;" +
+            "  text-decoration: none;" +
+            "  box-shadow: 0 12px 26px rgba(79, 70, 229, 0.28);" +
+            "}" +
+            ".btn-secondary {" +
+            "  background: linear-gradient(135deg, #334155 0%, #1e293b 100%);" +
+            "  box-shadow: 0 8px 20px rgba(30, 41, 59, 0.18);" +
+            "}" +
+            ".btn-secondary:hover {" +
+            "  background: linear-gradient(135deg, #1e293b 0%, #0f172a 100%);" +
+            "}" +
+            "input, select, textarea {" +
+            "  padding: 12px 14px;" +
+            "  width: 320px;" +
+            "  max-width: 100%;" +
+            "  margin-bottom: 10px;" +
+            "  border: 1px solid var(--border);" +
+            "  border-radius: 14px;" +
+            "  box-sizing: border-box;" +
+            "  background: rgba(255,255,255,0.92);" +
+            "  color: var(--text);" +
+            "  outline: none;" +
+            "  transition: border-color 0.2s ease, box-shadow 0.2s ease, transform 0.15s ease;" +
+            "  box-shadow: inset 0 1px 2px rgba(15,23,42,0.03);" +
+            "}" +
+            "input:focus, select:focus, textarea:focus {" +
+            "  border-color: rgba(79, 70, 229, 0.45);" +
+            "  box-shadow: 0 0 0 4px rgba(79, 70, 229, 0.10);" +
+            "}" +
+            "textarea {" +
+            "  min-height: 120px;" +
+            "  resize: vertical;" +
+            "}" +
+            "table {" +
+            "  width: 100%;" +
+            "  border-collapse: separate;" +
+            "  border-spacing: 0;" +
+            "  background: var(--surface-strong);" +
+            "  box-shadow: var(--shadow-soft);" +
+            "  border-radius: 18px;" +
+            "  overflow: hidden;" +
+            "  border: 1px solid var(--border);" +
+            "}" +
+            "th, td {" +
+            "  padding: 14px 16px;" +
+            "  border-bottom: 1px solid rgba(15, 23, 42, 0.06);" +
+            "  text-align: left;" +
+            "  vertical-align: top;" +
+            "}" +
+            "th {" +
+            "  background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);" +
+            "  color: white;" +
+            "  font-size: 0.9rem;" +
+            "  letter-spacing: 0.02em;" +
+            "}" +
+            "tr:last-child td { border-bottom: none; }" +
+            "tr:hover td {" +
+            "  background: #f8fafc;" +
+            "}" +
+            ".stats {" +
+            "  text-align: center;" +
+            "  margin-bottom: 20px;" +
+            "  font-size: 18px;" +
+            "}" +
+            ".message {" +
+            "  text-align: center;" +
+            "  font-weight: 700;" +
+            "  padding: 14px 16px;" +
+            "  border-radius: 16px;" +
+            "  margin-bottom: 20px;" +
+            "  border: 1px solid transparent;" +
+            "}" +
+            ".success {" +
+            "  color: #166534;" +
+            "  background: #ecfdf3;" +
+            "  border-color: #bbf7d0;" +
+            "}" +
+            ".error {" +
+            "  color: #991b1b;" +
+            "  background: #fef2f2;" +
+            "  border-color: #fecaca;" +
+            "}" +
+            ".empty-message {" +
+            "  text-align: center;" +
+            "  background: var(--surface-strong);" +
+            "  padding: 30px;" +
+            "  border-radius: 20px;" +
+            "  box-shadow: var(--shadow-soft);" +
+            "  font-weight: 700;" +
+            "  color: var(--muted);" +
+            "  margin-top: 20px;" +
+            "  border: 1px solid var(--border);" +
+            "}" +
+            ".highlight-box {" +
+            "  background: linear-gradient(135deg, #eef2ff 0%, #e0f2fe 100%);" +
+            "  padding: 18px;" +
+            "  border-radius: 20px;" +
+            "  margin-bottom: 22px;" +
+            "  text-align: center;" +
+            "  box-shadow: var(--shadow-soft);" +
+            "  border: 1px solid rgba(99,102,241,0.12);" +
+            "}" +
+            ".progress-bar {" +
+            "  height: 20px;" +
+            "  border-radius: 999px;" +
+            "  transition: width 0.8s ease-in-out;" +
+            "}" +
+            ".card {" +
+            "  display: inline-block;" +
+            "  width: 180px;" +
+            "  margin: 10px;" +
+            "  padding: 22px 18px;" +
+            "  background: linear-gradient(180deg, rgba(255,255,255,0.98) 0%, rgba(248,250,252,0.98) 100%);" +
+            "  border-radius: 20px;" +
+            "  box-shadow: var(--shadow-soft);" +
+            "  text-align: center;" +
+            "  vertical-align: top;" +
+            "  border: 1px solid var(--border);" +
+            "  transition: transform 0.18s ease, box-shadow 0.18s ease;" +
+            "}" +
+            ".card:hover {" +
+            "  transform: translateY(-3px);" +
+            "  box-shadow: 0 14px 30px rgba(15,23,42,0.10);" +
+            "}" +
+            ".card-title {" +
+            "  font-size: 0.92rem;" +
+            "  color: var(--muted);" +
+            "  margin-bottom: 10px;" +
+            "  font-weight: 600;" +
+            "}" +
+            ".card-value {" +
+            "  font-size: 2rem;" +
+            "  font-weight: 800;" +
+            "  letter-spacing: -0.03em;" +
+            "}" +
+            ".favorites-box {" +
+            "  background: linear-gradient(135deg, #fffdf4 0%, #fff7db 100%);" +
+            "  padding: 18px;" +
+            "  border-radius: 20px;" +
+            "  margin-top: 20px;" +
+            "  box-shadow: var(--shadow-soft);" +
+            "  border: 1px solid rgba(245, 158, 11, 0.15);" +
+            "}" +
+            ".recent-item {" +
+            "  background: var(--surface-strong);" +
+            "  padding: 14px 16px;" +
+            "  margin-bottom: 12px;" +
+            "  border-radius: 16px;" +
+            "  box-shadow: var(--shadow-soft);" +
+            "  border: 1px solid var(--border);" +
+            "}" +
+            ".badge {" +
+            "  color: white;" +
+            "  padding: 6px 10px;" +
+            "  border-radius: 999px;" +
+            "  font-size: 12px;" +
+            "  font-weight: 800;" +
+            "  display: inline-block;" +
+            "  letter-spacing: 0.02em;" +
+            "}" +
+            ".section-box {" +
+            "  background: var(--surface-strong);" +
+            "  padding: 20px;" +
+            "  border-radius: 20px;" +
+            "  box-shadow: var(--shadow-soft);" +
+            "  margin-top: 20px;" +
+            "  border: 1px solid var(--border);" +
+            "}" +
+            ".muted {" +
+            "  color: var(--muted);" +
+            "  font-size: 14px;" +
+            "}" +
+            ".form-box {" +
+            "  max-width: 460px;" +
+            "  margin: 0 auto;" +
+            "  background: linear-gradient(180deg, rgba(255,255,255,0.98) 0%, rgba(248,250,252,0.98) 100%);" +
+            "  padding: 28px;" +
+            "  border-radius: 22px;" +
+            "  box-shadow: var(--shadow-soft);" +
+            "  border: 1px solid var(--border);" +
+            "}" +
+            ".two-column {" +
+            "  display: grid;" +
+            "  grid-template-columns: 1fr 1fr;" +
+            "  gap: 20px;" +
+            "  margin-top: 20px;" +
+            "}" +
+            "canvas {" +
+            "  max-width: 100%;" +
+            "}" +
+            "@media (max-width: 900px) {" +
+            "  .two-column { grid-template-columns: 1fr; }" +
+            "  .container { width: 94%; padding: 18px; margin-top: 18px; border-radius: 22px; }" +
+            "  .card { width: calc(50% - 20px); }" +
+            "}" +
+            "@media (max-width: 640px) {" +
+            "  .card { width: 100%; margin: 10px 0; }" +
+            "  th, td { padding: 12px 10px; font-size: 0.92rem; }" +
+            "  .btn { width: 100%; margin: 6px 0; }" +
+            "  input, select, textarea { width: 100%; }" +
+            "}" +
             "</style>" +
             "</head>" +
             "<body><div class=\"container\">" +
@@ -107,14 +366,17 @@ let main args =
 
     app.MapGet("/", Func<IResult>(fun () ->
         let body =
+            "<div class=\"section-box\" style=\"padding:40px 24px; text-align:center; background:linear-gradient(135deg, #eef2ff 0%, #f8fafc 55%, #e0f2fe 100%);\">" +
+            "<div style=\"display:inline-block; padding:6px 12px; border-radius:999px; background:white; color:#4f46e5; font-weight:800; font-size:12px; margin-bottom:16px; border:1px solid rgba(79,70,229,0.12);\">Career Dashboard</div>" +
             "<h1>CareerTrack</h1>" +
             "<div class=\"subtitle\">Track your job and internship applications in one place</div>" +
-            "<p style=\"text-align:center;color:#666;\">Built with F# and ASP.NET Core</p>" +
+            "<p style=\"text-align:center;color:#64748b;max-width:720px;margin:0 auto 20px auto;\">A modern F# web application for organizing job applications, monitoring progress, managing priorities, and visualizing statistics.</p>" +
             "<div style=\"text-align:center; margin-top:20px;\">" +
-            "<a class=\"btn\" href=\"/applications-page\">Go to applications</a>" +
-            "<a class=\"btn\" href=\"/stats\">View statistics</a>" +
+            "<a class=\"btn\" href=\"/applications-page\">Open Applications</a>" +
+            "<a class=\"btn btn-secondary\" href=\"/stats\">View Statistics</a>" +
             "</div>" +
-            "<div style=\"text-align:center;margin-top:10px;color:#777;font-size:14px;\">Manage your applications efficiently</div>"
+            "<div style=\"text-align:center;margin-top:14px;color:#64748b;font-size:14px;\">Built with F# and ASP.NET Core</div>" +
+            "</div>"
 
         htmlPage "Home" body
     )) |> ignore
@@ -379,8 +641,8 @@ let main args =
             "<div style=\"display:inline-block;background:white;padding:12px 18px;border-radius:10px;box-shadow:0 2px 8px rgba(0,0,0,0.06);margin:6px;\"><b>Rejection rate:</b> " + rejectionRate + "</div>" +
             "</div>" +
             "<div style=\"text-align:center;margin-bottom:20px;\">" +
-            "<a class=\"btn\" href=\"/add-application\">+ Add Application</a> " +
-            "<a class=\"btn\" href=\"/stats\">View Statistics</a>" +
+            "<a class=\"btn\" href=\"/add-application\">+ Add New Application</a> " +
+            "<a class=\"btn btn-secondary\" href=\"/stats\">Open Dashboard</a>" +
             "</div>" +
             "<form method=\"get\" action=\"/applications-page\" style=\"text-align:center;margin-bottom:20px;\">" +
             "<input name=\"search\" value=\"" + esc search + "\" placeholder=\"Search by company or position\" /> " +
