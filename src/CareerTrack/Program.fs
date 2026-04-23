@@ -109,6 +109,7 @@ let main args =
         let body =
             "<h1>CareerTrack</h1>" +
             "<div class=\"subtitle\">Track your job and internship applications in one place</div>" +
+            "<p style=\"text-align:center;color:#666;\">Built with F# and ASP.NET Core</p>" +
             "<div style=\"text-align:center; margin-top:20px;\">" +
             "<a class=\"btn\" href=\"/applications-page\">Go to applications</a>" +
             "<a class=\"btn\" href=\"/stats\">View statistics</a>" +
