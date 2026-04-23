@@ -93,7 +93,8 @@ let main args =
     let applications = ResizeArray<Application>()
 
     let getNextId () =
-        if applications.Count = 0 then 1
+        if applications.Count = 0 then
+            1
         else
             applications
             |> Seq.map (fun a -> a.Id)
@@ -179,20 +180,28 @@ let main args =
         let sort = ctx.Request.Query["sort"].ToString()
 
         let successHtml =
-            if String.IsNullOrWhiteSpace(successMessage) then ""
-            else "<div class=\"message success\">" + successMessage + "</div>"
+            if String.IsNullOrWhiteSpace(successMessage) then
+                ""
+            else
+                "<div class=\"message success\">" + successMessage + "</div>"
 
         let errorHtml =
-            if String.IsNullOrWhiteSpace(errorMessage) then ""
-            else "<div class=\"message error\">" + errorMessage + "</div>"
+            if String.IsNullOrWhiteSpace(errorMessage) then
+                ""
+            else
+                "<div class=\"message error\">" + errorMessage + "</div>"
 
         let statusOption =
-            if String.IsNullOrWhiteSpace(statusFilter) then None
-            else parseStatus statusFilter
+            if String.IsNullOrWhiteSpace(statusFilter) then
+                None
+            else
+                parseStatus statusFilter
 
         let priorityOption =
-            if String.IsNullOrWhiteSpace(priorityFilter) then None
-            else parsePriority priorityFilter
+            if String.IsNullOrWhiteSpace(priorityFilter) then
+                None
+            else
+                parsePriority priorityFilter
 
         let filtered =
             applications
@@ -209,11 +218,14 @@ let main args =
                     | High -> 3
                     | Medium -> 2
                     | Low -> 1)
-            | _ -> filtered |> List.sortByDescending (fun a -> a.DateApplied)
+            | _ ->
+                filtered |> List.sortByDescending (fun a -> a.DateApplied)
 
         let latestApplication =
-            if List.isEmpty(sorted) then None
-            else Some (sorted |> List.maxBy (fun a -> a.DateApplied))
+            if List.isEmpty(sorted) then
+                None
+            else
+                Some (sorted |> List.maxBy (fun a -> a.DateApplied))
 
         let latestHtml =
             match latestApplication with
@@ -246,7 +258,7 @@ let main args =
 
         let favoritesHtml =
             if List.isEmpty(favoriteApplications) then
-                ""
+                "<div class=\"section-box\"><h2>Favorite Applications</h2><div class=\"muted\">No favorite applications yet.</div></div>"
             else
                 let items =
                     favoriteApplications
@@ -323,8 +335,12 @@ let main args =
             |> List.map (fun a ->
                 let color = statusColor a.Status
                 let statusText = statusToString a.Status
-                let favoritePrefix = if a.IsFavorite then "⭐ " else ""
-                let favoriteActionText = if a.IsFavorite then "Unfavorite" else "Favorite"
+                let favoritePrefix =
+                    if a.IsFavorite then "⭐ "
+                    else ""
+                let favoriteActionText =
+                    if a.IsFavorite then "Unfavorite"
+                    else "Favorite"
                 let priorityText = priorityToString a.Priority
                 let priorityColor = priorityToColor a.Priority
                 let followUpText = formatFollowUpDate a.FollowUpDate
@@ -347,19 +363,30 @@ let main args =
             )
             |> String.concat ""
 
-        let selectedStatusAll = if String.IsNullOrWhiteSpace(statusFilter) then "selected" else ""
-        let selectedStatusApplied = if statusFilter = "Applied" then "selected" else ""
-        let selectedStatusInterview = if statusFilter = "Interview" then "selected" else ""
-        let selectedStatusRejected = if statusFilter = "Rejected" then "selected" else ""
+        let selectedStatusAll =
+            if String.IsNullOrWhiteSpace(statusFilter) then "selected" else ""
+        let selectedStatusApplied =
+            if statusFilter = "Applied" then "selected" else ""
+        let selectedStatusInterview =
+            if statusFilter = "Interview" then "selected" else ""
+        let selectedStatusRejected =
+            if statusFilter = "Rejected" then "selected" else ""
 
-        let selectedPriorityAll = if String.IsNullOrWhiteSpace(priorityFilter) then "selected" else ""
-        let selectedPriorityLow = if priorityFilter = "Low" then "selected" else ""
-        let selectedPriorityMedium = if priorityFilter = "Medium" then "selected" else ""
-        let selectedPriorityHigh = if priorityFilter = "High" then "selected" else ""
+        let selectedPriorityAll =
+            if String.IsNullOrWhiteSpace(priorityFilter) then "selected" else ""
+        let selectedPriorityLow =
+            if priorityFilter = "Low" then "selected" else ""
+        let selectedPriorityMedium =
+            if priorityFilter = "Medium" then "selected" else ""
+        let selectedPriorityHigh =
+            if priorityFilter = "High" then "selected" else ""
 
-        let selectedDate = if String.IsNullOrWhiteSpace(sort) || sort = "date" then "selected" else ""
-        let selectedCompany = if sort = "company" then "selected" else ""
-        let selectedPrioritySort = if sort = "priority" then "selected" else ""
+        let selectedDate =
+            if String.IsNullOrWhiteSpace(sort) || sort = "date" then "selected" else ""
+        let selectedCompany =
+            if sort = "company" then "selected" else ""
+        let selectedPrioritySort =
+            if sort = "priority" then "selected" else ""
 
         let applicationsContent =
             if List.isEmpty(sorted) then
@@ -415,7 +442,7 @@ let main args =
             applicationsContent +
             "<div class=\"two-column\">" +
             upcomingActionsHtml +
-            (if String.IsNullOrWhiteSpace(favoritesHtml) then "<div></div>" else favoritesHtml) +
+            favoritesHtml +
             "</div>" +
             recentHtml
 
@@ -423,13 +450,16 @@ let main args =
     )) |> ignore
 
     app.MapGet("/application/{id}", Func<int, IResult>(fun id ->
-        let item = applications |> Seq.tryFind (fun a -> a.Id = id)
+        let item =
+            applications |> Seq.tryFind (fun a -> a.Id = id)
 
         match item with
         | Some a ->
             let color = statusColor a.Status
             let statusText = statusToString a.Status
-            let favoriteText = if a.IsFavorite then "Yes" else "No"
+            let favoriteText =
+                if a.IsFavorite then "Yes"
+                else "No"
 
             let body =
                 "<h1>Application Details</h1>" +
@@ -454,8 +484,10 @@ let main args =
         let errorMessage = ctx.Request.Query["error"].ToString()
 
         let errorHtml =
-            if String.IsNullOrWhiteSpace(errorMessage) then ""
-            else "<div class=\"message error\">" + errorMessage + "</div>"
+            if String.IsNullOrWhiteSpace(errorMessage) then
+                ""
+            else
+                "<div class=\"message error\">" + errorMessage + "</div>"
 
         let body =
             "<h1>Add Application</h1>" +
@@ -507,8 +539,10 @@ let main args =
                 parsePriority priority |> Option.defaultValue Medium
 
             let followUpDate =
-                if String.IsNullOrWhiteSpace(followUpDateRaw) then None
-                else tryParseDate followUpDateRaw
+                if String.IsNullOrWhiteSpace(followUpDateRaw) then
+                    None
+                else
+                    tryParseDate followUpDateRaw
 
             let newApp =
                 {
@@ -530,7 +564,8 @@ let main args =
     app.MapGet("/edit/{id}", Func<HttpContext, int, IResult>(fun ctx id ->
         let errorMessage = ctx.Request.Query["error"].ToString()
 
-        let item = applications |> Seq.tryFind (fun a -> a.Id = id)
+        let item =
+            applications |> Seq.tryFind (fun a -> a.Id = id)
 
         match item with
         | Some a ->
@@ -548,8 +583,10 @@ let main args =
                 | None -> ""
 
             let errorHtml =
-                if String.IsNullOrWhiteSpace(errorMessage) then ""
-                else "<div class=\"message error\">" + errorMessage + "</div>"
+                if String.IsNullOrWhiteSpace(errorMessage) then
+                    ""
+                else
+                    "<div class=\"message error\">" + errorMessage + "</div>"
 
             let body =
                 "<h1>Edit Application</h1>" +
@@ -585,7 +622,8 @@ let main args =
             if req.Form.ContainsKey(name) then req.Form[name].ToString().Trim()
             else fallback
 
-        let existing = applications |> Seq.tryFind (fun a -> a.Id = id)
+        let existing =
+            applications |> Seq.tryFind (fun a -> a.Id = id)
 
         match existing with
         | Some oldItem ->
@@ -675,6 +713,7 @@ let main args =
 
         let body =
             "<h1>Statistics</h1>" +
+
             "<div style=\"text-align:center;margin-bottom:25px;\">" +
             cardHtml "Total" (string total) "#2c3e50" +
             cardHtml "Applied" (string applied) "green" +
@@ -683,7 +722,11 @@ let main args =
             cardHtml "Favorites" (string favorites) "#f1c40f" +
             cardHtml "High Priority" (string highPriority) "#c0392b" +
             "</div>" +
+
+            "<div class=\"two-column\">" +
+
             "<div class=\"section-box stats\">" +
+            "<h2>Status Overview</h2>" +
 
             "<p><b>Applied:</b> " + string applied + " (" + appliedPercent.ToString("0.0") + "%)</p>" +
             "<div style=\"width:300px;margin:0 auto 15px auto;background:#ddd;border-radius:8px;overflow:hidden;\">" +
@@ -705,6 +748,66 @@ let main args =
             "<p><b>Favorite applications:</b> " + string favorites + "</p>" +
             "<p><b>High priority applications:</b> " + string highPriority + "</p>" +
             "</div>" +
+
+            "<div class=\"section-box\" style=\"text-align:center;\">" +
+            "<h2>Status Distribution</h2>" +
+            "<canvas id=\"statusChart\" width=\"320\" height=\"320\"></canvas>" +
+            "</div>" +
+
+            "</div>" +
+
+            "<div class=\"section-box\" style=\"margin-top:20px; text-align:center;\">" +
+            "<h2>Applications by Status</h2>" +
+            "<canvas id=\"statusBarChart\" height=\"120\"></canvas>" +
+            "</div>" +
+
+            "<script src=\"https://cdn.jsdelivr.net/npm/chart.js\"></script>" +
+            "<script>" +
+            "const doughnutCtx = document.getElementById('statusChart');" +
+            "new Chart(doughnutCtx, {" +
+            "type: 'doughnut'," +
+            "data: {" +
+            "labels: ['Applied', 'Interview', 'Rejected']," +
+            "datasets: [{" +
+            "label: 'Applications'," +
+            "data: [" + string applied + ", " + string interview + ", " + string rejected + "]," +
+            "backgroundColor: ['#2ecc71', '#f39c12', '#e74c3c']," +
+            "borderWidth: 1" +
+            "}]" +
+            "}," +
+            "options: {" +
+            "responsive: true," +
+            "plugins: {" +
+            "legend: { position: 'bottom' }" +
+            "}" +
+            "}" +
+            "});" +
+
+            "const barCtx = document.getElementById('statusBarChart');" +
+            "new Chart(barCtx, {" +
+            "type: 'bar'," +
+            "data: {" +
+            "labels: ['Applied', 'Interview', 'Rejected']," +
+            "datasets: [{" +
+            "label: 'Count'," +
+            "data: [" + string applied + ", " + string interview + ", " + string rejected + "]," +
+            "backgroundColor: ['#2ecc71', '#f39c12', '#e74c3c']" +
+            "}]" +
+            "}," +
+            "options: {" +
+            "responsive: true," +
+            "scales: {" +
+            "y: {" +
+            "beginAtZero: true," +
+            "ticks: { precision: 0 }" +
+            "}" +
+            "}," +
+            "plugins: {" +
+            "legend: { display: false }" +
+            "}" +
+            "}" +
+            "});" +
+            "</script>" +
 
             "<p style=\"text-align:center; margin-top:20px;\">" +
             "<a class=\"btn\" href=\"/applications-page\">Back to applications</a>" +
