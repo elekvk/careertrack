@@ -113,7 +113,8 @@ let main args =
             "<div style=\"text-align:center; margin-top:20px;\">" +
             "<a class=\"btn\" href=\"/applications-page\">Go to applications</a>" +
             "<a class=\"btn\" href=\"/stats\">View statistics</a>" +
-            "</div>"
+            "</div>" +
+            "<div style=\"text-align:center;margin-top:10px;color:#777;font-size:14px;\">Manage your applications efficiently</div>"
 
         htmlPage "Home" body
     )) |> ignore
