@@ -380,7 +380,7 @@ let main args =
             "<a class=\"btn\" href=\"/stats\">View Statistics</a>" +
             "</div>" +
             "<form method=\"get\" action=\"/applications-page\" style=\"text-align:center;margin-bottom:20px;\">" +
-            "<input name=\"search\" value=\"" + esc search + "\" placeholder=\"Search\" /> " +
+            "<input name=\"search\" value=\"" + esc search + "\" placeholder=\"Search by company or position\" /> " +
             "<select name=\"status\">" +
             "<option value=\"\" " + selectedStatusAll + ">All Statuses</option>" +
             "<option value=\"Applied\" " + selectedStatusApplied + ">Applied</option>" +
