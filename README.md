@@ -12,7 +12,7 @@ A web application for tracking job and internship applications, built with **F# 
 
 ## Live Demo
 
- https://careertrack-e5rg.onrender.com
+ [Open CareerTrack](https://careertrack-e5rg.onrender.com)
 
 ---
 
@@ -91,15 +91,6 @@ Application Details
 Filtering Example
 ![Filter](screenshots/filter.png)
 
-Applications Page
-![Applications](screenshots/applications.png)
-
-Add Application
-![Add](screenshots/add.png)
-
-Statistics Dashboard
-![Stats](screenshots/stats.png)
-
 ---
 
 ## Getting Started (Local)
@@ -107,4 +98,4 @@ Statistics Dashboard
 ```bash
 git clone https://github.com/elekvk/careertrack.git
 cd careertrack
-dotnet run
+dotnet run --project src/CareerTrack/CareerTrack.fsproj
