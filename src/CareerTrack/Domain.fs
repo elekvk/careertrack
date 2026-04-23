@@ -72,11 +72,16 @@ let initialState =
         SearchText = ""
     }
 
+let containsInsensitive (needle: string) (haystack: string) =
+    haystack.IndexOf(needle, StringComparison.OrdinalIgnoreCase) >= 0
+
 let matchesSearch (search: string) (app: Application) =
-    let s = search.ToLower()
-    app.Company.ToLower().Contains(s)
-    || app.Position.ToLower().Contains(s)
-    || app.Notes.ToLower().Contains(s)
+    if String.IsNullOrWhiteSpace(search) then
+        true
+    else
+        containsInsensitive search app.Company
+        || containsInsensitive search app.Position
+        || containsInsensitive search app.Notes
 
 let filterApplications (state: State) =
     state.Applications
@@ -87,15 +92,15 @@ let matchesStatus (statusFilter: ApplicationStatus option) (app: Application) =
     | None -> true
     | Some s -> app.Status = s
 
-let filterBySearchAndStatus (search: string) (status: ApplicationStatus option) (apps: Application list) =
-    apps
-    |> List.filter (matchesSearch search)
-    |> List.filter (matchesStatus status)
-
 let matchesPriority (priorityFilter: Priority option) (app: Application) =
     match priorityFilter with
     | None -> true
     | Some p -> app.Priority = p
+
+let filterBySearchAndStatus (search: string) (status: ApplicationStatus option) (apps: Application list) =
+    apps
+    |> List.filter (matchesSearch search)
+    |> List.filter (matchesStatus status)
 
 let filterBySearchStatusAndPriority
     (search: string)
@@ -153,17 +158,17 @@ let calculateStatistics (apps: Application list) =
     ) emptyStatistics
 
 let parseStatus (status: string) =
-    match status with
-    | "Applied" -> Some Applied
-    | "Interview" -> Some Interview
-    | "Rejected" -> Some Rejected
+    match status.Trim().ToLowerInvariant() with
+    | "applied" -> Some Applied
+    | "interview" -> Some Interview
+    | "rejected" -> Some Rejected
     | _ -> None
 
 let parsePriority (priority: string) =
-    match priority with
-    | "Low" -> Some Low
-    | "Medium" -> Some Medium
-    | "High" -> Some High
+    match priority.Trim().ToLowerInvariant() with
+    | "low" -> Some Low
+    | "medium" -> Some Medium
+    | "high" -> Some High
     | _ -> None
 
 let priorityToString priority =

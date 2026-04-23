@@ -1,4 +1,5 @@
 ﻿open System
+open System.Net
 open Microsoft.AspNetCore.Builder
 open Microsoft.Extensions.Hosting
 open Microsoft.AspNetCore.Http
@@ -61,6 +62,9 @@ let main args =
             "text/html; charset=utf-8"
         )
 
+    let esc (s: string) =
+        WebUtility.HtmlEncode(s)
+
     let statusToString status =
         match status with
         | Applied -> "Applied"
@@ -86,11 +90,11 @@ let main args =
 
     let cardHtml title value color =
         "<div class=\"card\">" +
-        "<div class=\"card-title\">" + title + "</div>" +
-        "<div class=\"card-value\" style=\"color:" + color + ";\">" + value + "</div>" +
+        "<div class=\"card-title\">" + esc title + "</div>" +
+        "<div class=\"card-value\" style=\"color:" + color + ";\">" + esc value + "</div>" +
         "</div>"
 
-    let applications = ResizeArray<Application>()
+    let applications = ResizeArray<Application>(initialState.Applications)
 
     let getNextId () =
         if applications.Count = 0 then
@@ -100,48 +104,6 @@ let main args =
             |> Seq.map (fun a -> a.Id)
             |> Seq.max
             |> fun maxId -> maxId + 1
-
-    applications.Add(
-        {
-            Id = 1
-            Company = "Microsoft"
-            Position = "Backend Intern"
-            DateApplied = DateTime(2026, 3, 1)
-            Status = Applied
-            Notes = "Applied through website"
-            IsFavorite = false
-            FollowUpDate = Some(DateTime(2026, 4, 25))
-            Priority = High
-        }
-    )
-
-    applications.Add(
-        {
-            Id = 2
-            Company = "Google"
-            Position = "Software Engineer Intern"
-            DateApplied = DateTime(2026, 3, 3)
-            Status = Interview
-            Notes = "HR round done"
-            IsFavorite = true
-            FollowUpDate = Some(DateTime(2026, 4, 23))
-            Priority = High
-        }
-    )
-
-    applications.Add(
-        {
-            Id = 3
-            Company = "SAP"
-            Position = "Junior Developer"
-            DateApplied = DateTime(2026, 3, 5)
-            Status = Rejected
-            Notes = "Rejected email"
-            IsFavorite = false
-            FollowUpDate = None
-            Priority = Low
-        }
-    )
 
     app.MapGet("/", Func<IResult>(fun () ->
         let body =
@@ -183,13 +145,13 @@ let main args =
             if String.IsNullOrWhiteSpace(successMessage) then
                 ""
             else
-                "<div class=\"message success\">" + successMessage + "</div>"
+                "<div class=\"message success\">" + esc successMessage + "</div>"
 
         let errorHtml =
             if String.IsNullOrWhiteSpace(errorMessage) then
                 ""
             else
-                "<div class=\"message error\">" + errorMessage + "</div>"
+                "<div class=\"message error\">" + esc errorMessage + "</div>"
 
         let statusOption =
             if String.IsNullOrWhiteSpace(statusFilter) then
@@ -231,7 +193,7 @@ let main args =
             match latestApplication with
             | Some a ->
                 "<div class=\"highlight-box\">" +
-                "<b>Latest application:</b> " + a.Company + " - " + a.Position +
+                "<b>Latest application:</b> " + esc a.Company + " - " + esc a.Position +
                 " <span class=\"badge\" style=\"background:" + statusColor a.Status + "; margin-left:8px;\">" +
                 statusToString a.Status +
                 "</span></div>"
@@ -264,7 +226,7 @@ let main args =
                     favoriteApplications
                     |> List.map (fun a ->
                         "<div style=\"padding:10px 0;border-bottom:1px solid #eee;\">" +
-                        "⭐ <b>" + a.Company + "</b> - " + a.Position +
+                        "⭐ <b>" + esc a.Company + "</b> - " + esc a.Position +
                         " <span style=\"color:#666;\">(" + statusToString a.Status + ")</span>" +
                         "</div>"
                     )
@@ -288,7 +250,7 @@ let main args =
                     recentApplications
                     |> List.map (fun a ->
                         "<div class=\"recent-item\">" +
-                        "<b>" + a.Company + "</b> - " + a.Position +
+                        "<b>" + esc a.Company + "</b> - " + esc a.Position +
                         "<div style=\"font-size:13px;color:#666;margin-top:4px;\">Applied on " + a.DateApplied.ToString("yyyy-MM-dd") + "</div>" +
                         "</div>"
                     )
@@ -322,7 +284,7 @@ let main args =
                                 ""
 
                         "<div style=\"padding:10px 0;border-bottom:1px solid #eee;\">" +
-                        "<b>" + a.Company + "</b> - " + a.Position +
+                        "<b>" + esc a.Company + "</b> - " + esc a.Position +
                         "<div class=\"muted\" style=\"margin-top:4px;\">Follow-up: " + d.ToString("yyyy-MM-dd") + overdue + "</div>" +
                         "</div>"
                     )
@@ -346,13 +308,13 @@ let main args =
                 let followUpText = formatFollowUpDate a.FollowUpDate
 
                 "<tr>" +
-                "<td>" + favoritePrefix + a.Company + "</td>" +
-                "<td>" + a.Position + "</td>" +
+                "<td>" + favoritePrefix + esc a.Company + "</td>" +
+                "<td>" + esc a.Position + "</td>" +
                 "<td><span class=\"badge\" style=\"background:" + color + ";\">" + statusText + "</span></td>" +
                 "<td><span class=\"badge\" style=\"background:" + priorityColor + ";\">" + priorityText + "</span></td>" +
-                "<td>" + followUpText + "</td>" +
+                "<td>" + esc followUpText + "</td>" +
                 "<td>" + a.DateApplied.ToString("yyyy-MM-dd") + "</td>" +
-                "<td>" + a.Notes + "</td>" +
+                "<td>" + esc a.Notes + "</td>" +
                 "<td>" +
                 "<a href=\"/application/" + string a.Id + "\">View</a> | " +
                 "<a href=\"/edit/" + string a.Id + "\">Edit</a> | " +
@@ -418,7 +380,7 @@ let main args =
             "<a class=\"btn\" href=\"/stats\">View Statistics</a>" +
             "</div>" +
             "<form method=\"get\" action=\"/applications-page\" style=\"text-align:center;margin-bottom:20px;\">" +
-            "<input name=\"search\" value=\"" + search + "\" placeholder=\"Search\" /> " +
+            "<input name=\"search\" value=\"" + esc search + "\" placeholder=\"Search\" /> " +
             "<select name=\"status\">" +
             "<option value=\"\" " + selectedStatusAll + ">All Statuses</option>" +
             "<option value=\"Applied\" " + selectedStatusApplied + ">Applied</option>" +
@@ -464,13 +426,13 @@ let main args =
             let body =
                 "<h1>Application Details</h1>" +
                 "<div class=\"form-box\" style=\"max-width:700px;\">" +
-                "<p><b>Company:</b> " + a.Company + "</p>" +
-                "<p><b>Position:</b> " + a.Position + "</p>" +
+                "<p><b>Company:</b> " + esc a.Company + "</p>" +
+                "<p><b>Position:</b> " + esc a.Position + "</p>" +
                 "<p><b>Status:</b> <span class=\"badge\" style=\"background:" + color + ";\">" + statusText + "</span></p>" +
                 "<p><b>Priority:</b> <span class=\"badge\" style=\"background:" + priorityToColor a.Priority + ";\">" + priorityToString a.Priority + "</span></p>" +
                 "<p><b>Date applied:</b> " + a.DateApplied.ToString("yyyy-MM-dd") + "</p>" +
-                "<p><b>Follow-up date:</b> " + formatFollowUpDate a.FollowUpDate + "</p>" +
-                "<p><b>Notes:</b> " + a.Notes + "</p>" +
+                "<p><b>Follow-up date:</b> " + esc (formatFollowUpDate a.FollowUpDate) + "</p>" +
+                "<p><b>Notes:</b> " + esc a.Notes + "</p>" +
                 "<p><b>Favorite:</b> " + favoriteText + "</p>" +
                 "<p><a href=\"/applications-page\">Back to list</a></p>" +
                 "</div>"
@@ -487,7 +449,7 @@ let main args =
             if String.IsNullOrWhiteSpace(errorMessage) then
                 ""
             else
-                "<div class=\"message error\">" + errorMessage + "</div>"
+                "<div class=\"message error\">" + esc errorMessage + "</div>"
 
         let body =
             "<h1>Add Application</h1>" +
@@ -586,15 +548,15 @@ let main args =
                 if String.IsNullOrWhiteSpace(errorMessage) then
                     ""
                 else
-                    "<div class=\"message error\">" + errorMessage + "</div>"
+                    "<div class=\"message error\">" + esc errorMessage + "</div>"
 
             let body =
                 "<h1>Edit Application</h1>" +
                 errorHtml +
                 "<div class=\"form-box\">" +
                 "<form method=\"post\" action=\"/update/" + string a.Id + "\">" +
-                "<input name=\"company\" value=\"" + a.Company + "\" /><br/>" +
-                "<input name=\"position\" value=\"" + a.Position + "\" /><br/>" +
+                "<input name=\"company\" value=\"" + esc a.Company + "\" /><br/>" +
+                "<input name=\"position\" value=\"" + esc a.Position + "\" /><br/>" +
                 "<select name=\"status\">" +
                 "<option value=\"Applied\" " + selectedApplied + ">Applied</option>" +
                 "<option value=\"Interview\" " + selectedInterview + ">Interview</option>" +
@@ -605,8 +567,8 @@ let main args =
                 "<option value=\"Medium\" " + selectedMedium + ">Medium</option>" +
                 "<option value=\"High\" " + selectedHigh + ">High</option>" +
                 "</select><br/>" +
-                "<input type=\"date\" name=\"followUpDate\" value=\"" + followUpValue + "\" /><br/>" +
-                "<textarea name=\"notes\">" + a.Notes + "</textarea><br/>" +
+                "<input type=\"date\" name=\"followUpDate\" value=\"" + esc followUpValue + "\" /><br/>" +
+                "<textarea name=\"notes\">" + esc a.Notes + "</textarea><br/>" +
                 "<button class=\"btn\" type=\"submit\">Update</button>" +
                 "</form>" +
                 "<p><a href=\"/applications-page\">Back to list</a></p>" +
